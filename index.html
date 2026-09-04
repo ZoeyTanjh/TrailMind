@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TrailMind - AI Outdoor Trip Planner</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f7f4;
+      color: #1f2933;
+    }
+
+    header {
+      padding: 24px 8%;
+      background: white;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .hero {
+      text-align: center;
+      padding: 70px 20px 40px;
+    }
+
+    .hero h1 {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+
+    .hero p {
+      font-size: 19px;
+      color: #667085;
+    }
+
+    .container {
+      max-width: 850px;
+      margin: 20px auto 80px;
+      padding: 0 20px;
+    }
+
+    .card {
+      background: white;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+    }
+
+    label {
+      display: block;
+      margin-top: 18px;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 13px;
+      border: 1px solid #d0d5dd;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 25px;
+      padding: 15px;
+      border: none;
+      border-radius: 8px;
+      background: #1f2933;
+      color: white;
+      font-size: 17px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    #result {
+      display: none;
+      margin-top: 25px;
+      padding: 25px;
+      background: #f0f4ef;
+      border-radius: 12px;
+    }
+
+    #result h2 {
+      margin-bottom: 15px;
+    }
+
+    .trail {
+      margin-top: 15px;
+      padding: 18px;
+      background: white;
+      border-radius: 10px;
+    }
+
+    .trail strong {
+      font-size: 20px;
+    }
+
+    .trail p {
+      margin-top: 8px;
+      color: #667085;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <div class="logo">🥾 TrailMind</div>
+  </header>
+
+  <section class="hero">
+    <h1>Plan Your Next Adventure</h1>
+    <p>AI-powered outdoor trip planning for hikers.</p>
+  </section>
+
+  <div class="container">
+    <div class="card">
+
+      <h2>Find a Trail</h2>
+
+      <label for="location">Location</label>
+      <input
+        id="location"
+        type="text"
+        placeholder="e.g. Bay Area"
+      >
+
+      <label for="activity">Activity</label>
+      <select id="activity">
+        <option>Hiking</option>
+        <option>Running</option>
+        <option>Cycling</option>
+      </select>
+
+      <label for="experience">Experience Level</label>
+      <select id="experience">
+        <option>Beginner</option>
+        <option>Intermediate</option>
+        <option>Advanced</option>
+      </select>
+
+      <label for="distance">Preferred Distance</label>
+      <select id="distance">
+        <option>Short (under 5 miles)</option>
+        <option>Medium (5-10 miles)</option>
+        <option>Long (10+ miles)</option>
+      </select>
+
+      <button onclick="findTrail()">
+        ✨ Find My Trail
+      </button>
+
+      <div id="result">
+        <h2>Recommended Trail</h2>
+
+        <div class="trail">
+          <strong>Mission Peak</strong>
+          <p>📍 Fremont, California</p>
+          <p>🥾 5.8 miles · Moderate</p>
+          <p>⛰️ Elevation gain: 2,100 ft</p>
+          <p>☀️ Great conditions for hiking</p>
+
+          <br>
+
+          <strong>AI Recommendation</strong>
+          <p>
+            This trail is a good match based on your selected
+            experience level and preferred distance.
+          </p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    function findTrail() {
+      const location = document.getElementById("location").value;
+
+      if (location.trim() === "") {
+        alert("Please enter a location.");
+        return;
+      }
+
+      document.getElementById("result").style.display = "block";
+    }
+  </script>
+
+</body>
+</html>
