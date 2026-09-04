@@ -503,6 +503,63 @@
      MAIN SEARCH FUNCTION
   ========================= */
 
+  function getWeatherDescription(code) {
+
+    if (code === 0) {
+      return {
+        icon: "☀️",
+        text: "Clear sky"
+      };
+    }
+
+    if (code === 1 || code === 2) {
+      return {
+        icon: "🌤️",
+        text: "Partly cloudy"
+      };
+    }
+
+    if (code === 3) {
+      return {
+        icon: "☁️",
+        text: "Cloudy"
+      };
+    }
+
+    if (code >= 51 && code <= 67) {
+      return {
+        icon: "🌧️",
+        text: "Rain"
+      };
+    }
+  
+    if (code >= 71 && code <= 77) {
+      return {
+        icon: "❄️",
+        text: "Snow"
+      };
+    }
+  
+    if (code >= 80 && code <= 82) {
+      return {
+        icon: "🌦️",
+        text: "Rain showers"
+      };
+    }
+  
+    if (code >= 95) {
+      return {
+        icon: "⛈️",
+        text: "Thunderstorm"
+      };
+    }
+  
+    return {
+      icon: "🌤️",
+      text: "Current conditions"
+    };
+  }
+  
   async function findTrail() {
 
     const locationInput =
@@ -732,13 +789,31 @@
 
 
       /* =========================
-         CONDITIONS
+         LIVE WEATHER
       ========================= */
+
+      const weatherResponse = await fetch(
+        `https://api.open-meteo.com/v1/forecast?latitude=${trail.lat}&longitude=${trail.lon}&current=temperature_2m,weather_code,wind_speed_10m&temperature_unit=fahrenheit&wind_speed_unit=mph`
+      );
+
+      const weatherData = await weatherResponse.json();
+
+      const temperature =
+        Math.round(weatherData.current.temperature_2m);
+
+      const wind =
+        Math.round(weatherData.current.wind_speed_10m);
+
+      const weatherCode =
+        weatherData.current.weather_code;
+
+      const weatherInfo =
+        getWeatherDescription(weatherCode);
 
       document.getElementById(
         "conditions"
       ).textContent =
-        "☀️ Good conditions for outdoor activity";
+        `${weatherInfo.icon} ${temperature}°F · ${weatherInfo.text} · Wind ${wind} mph`;
 
 
       /* =========================
