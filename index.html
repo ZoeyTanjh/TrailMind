@@ -248,6 +248,46 @@
       .bindPopup(`<b>${location}</b>`)
       .openPopup();
 
+    const trailData = [
+      {
+        name: "Mission Peak",
+        location: "Fremont, California",
+        distance: "5.8 miles",
+        difficulty: "Moderate",
+        elevation: "2,100 ft"
+      },
+      {
+        name: "Lake Chabot Loop",
+        location: "Castro Valley, California",
+        distance: "7.5 miles",
+        difficulty: "Moderate",
+        elevation: "1,200 ft"
+      },
+      {
+        name: "Rancho San Antonio",
+        location: "Cupertino, California",
+        distance: "3.4 miles",
+        difficulty: "Easy",
+        elevation: "650 ft"
+      }
+    ];
+
+    const trailContainer = document.querySelector(".trail");
+
+    trailContainer.innerHTML = `
+      <strong>${trailData[0].name}</strong>
+      <p>📍 ${trailData[0].location}</p>
+      <p>🥾 ${trailData[0].distance} · ${trailData[0].difficulty}</p>
+      <p>⛰️ Elevation gain: ${trailData[0].elevation}</p>
+
+      <br>
+
+      <strong>AI Recommendation</strong>
+      <p>
+        This trail is a good match based on your selected
+        experience level and preferred distance.
+      </p>
+    `;
     document.getElementById("result").style.display = "block";
     map.invalidateSize();
 
