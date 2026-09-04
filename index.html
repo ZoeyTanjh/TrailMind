@@ -116,7 +116,20 @@
       margin-top: 8px;
       color: #667085;
     }
+
+    #map {
+      width: 100%;
+      height: 400px;
+      margin-top: 25px;
+      border-radius: 12px;
+    }
   </style>
+  
+  <link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 
 <body>
@@ -167,9 +180,12 @@
         ✨ Find My Trail
       </button>
 
+      
       <div id="result">
         <h2>Recommended Trail</h2>
-
+        
+        <div id="map"></div>
+        
         <div class="trail">
           <strong>Mission Peak</strong>
           <p>📍 Fremont, California</p>
@@ -191,17 +207,28 @@
   </div>
 
   <script>
-    function findTrail() {
-      const location = document.getElementById("location").value;
+  let map = L.map('map').setView([37.5126, -121.8800], 12);
 
-      if (location.trim() === "") {
-        alert("Please enter a location.");
-        return;
-      }
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map);
 
-      document.getElementById("result").style.display = "block";
+  L.marker([37.5126, -121.8800])
+    .addTo(map)
+    .bindPopup('<b>Mission Peak</b><br>Fremont, California')
+    .openPopup();
+
+  function findTrail() {
+    const location = document.getElementById("location").value;
+
+    if (location.trim() === "") {
+      alert("Please enter a location.");
+      return;
     }
-  </script>
 
+    document.getElementById("result").style.display = "block";
+    map.invalidateSize();
+  }
+</script>
 </body>
 </html>
