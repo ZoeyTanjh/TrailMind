@@ -403,49 +403,53 @@
      TRAIL DATABASE
   ========================= */
 
-  const trailData = [
+  async function getRealTrails(lat, lon) {
 
-    {
-      name: "Rancho San Antonio",
-      location: "Cupertino, California",
-      distance: 3.4,
-      difficulty: "Easy",
-      elevation: "650 ft",
-      lat: 37.3197,
-      lon: -122.0753
-    },
+    const query = `
+      [out:json][timeout:25];
+      (
+        way(around:10000,${lat},${lon})["highway"="path"]["name"];
+        way(around:10000,${lat},${lon})["highway"="track"]["name"];
+        relation(around:10000,${lat},${lon})["route"="hiking"]["name"];
+      );
+      out center;
+    `;
+  
+    const response = await fetch(
+      "https://overpass-api.de/api/interpreter",
+      {
+        method: "POST",
+        body: "data=" + encodeURIComponent(query)
+      }
+    );
+  
+    const data = await response.json();
+  
+    return data.elements
+      .filter(item => item.tags && item.tags.name)
+      .slice(0, 20)
+      .map(item => {
+  
+        const lat =
+          item.center?.lat ||
+          item.lat;
+  
+        const lon =
+          item.center?.lon ||
+          item.lon;
+  
+        return {
+          name: item.tags.name,
+          location: "Near your search",
+          distance: "Trail",
+          difficulty: "Outdoor",
+          elevation: "N/A",
+          lat: lat,
+          lon: lon
+        };
 
-    {
-      name: "Mission Peak",
-      location: "Fremont, California",
-      distance: 5.8,
-      difficulty: "Moderate",
-      elevation: "2,100 ft",
-      lat: 37.5126,
-      lon: -121.8800
-    },
-
-    {
-      name: "Lake Chabot Loop",
-      location: "Castro Valley, California",
-      distance: 7.5,
-      difficulty: "Moderate",
-      elevation: "1,200 ft",
-      lat: 37.7300,
-      lon: -122.0580
-    },
-
-    {
-      name: "Mount Diablo Summit",
-      location: "Mount Diablo, California",
-      distance: 13.0,
-      difficulty: "Hard",
-      elevation: "3,500 ft",
-      lat: 37.8816,
-      lon: -121.9142
-    }
-
-  ];
+      });
+  }
 
 
   /* =========================
@@ -635,11 +639,19 @@
          RECOMMEND TRAIL
       ========================= */
 
-      const trail =
-        recommendTrail(
+      const realTrails =
+        await getRealTrails(lat, lon);
+      
+      let trail;
+      
+      if (realTrails.length > 0) {
+        trail = realTrails[0];
+      } else {
+        trail = recommendTrail(
           experience,
           distance
         );
+      }
 
 
       /* =========================
