@@ -3,7 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>TrailMind - AI Outdoor Trip Planner</title>
+
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
 
   <style>
     * {
@@ -16,12 +22,16 @@
       font-family: Arial, sans-serif;
       background: #f5f7f4;
       color: #1f2933;
+      line-height: 1.5;
     }
 
     header {
-      padding: 24px 8%;
       background: white;
       border-bottom: 1px solid #e5e7eb;
+      padding: 20px 8%;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
     }
 
     .logo {
@@ -31,21 +41,23 @@
 
     .hero {
       text-align: center;
-      padding: 70px 20px 40px;
+      padding: 70px 20px 45px;
     }
 
     .hero h1 {
       font-size: 48px;
-      margin-bottom: 16px;
+      margin-bottom: 15px;
     }
 
     .hero p {
       font-size: 19px;
       color: #667085;
+      max-width: 650px;
+      margin: auto;
     }
 
     .container {
-      max-width: 850px;
+      max-width: 900px;
       margin: 20px auto 80px;
       padding: 0 20px;
     }
@@ -53,8 +65,17 @@
     .card {
       background: white;
       padding: 30px;
-      border-radius: 16px;
+      border-radius: 18px;
       box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+    }
+
+    .card h2 {
+      margin-bottom: 10px;
+    }
+
+    .subtitle {
+      color: #667085;
+      margin-bottom: 20px;
     }
 
     label {
@@ -64,12 +85,20 @@
       font-weight: bold;
     }
 
-    input, select {
+    input,
+    select {
       width: 100%;
       padding: 13px;
       border: 1px solid #d0d5dd;
-      border-radius: 8px;
+      border-radius: 9px;
       font-size: 16px;
+      background: white;
+    }
+
+    input:focus,
+    select:focus {
+      outline: none;
+      border-color: #667085;
     }
 
     button {
@@ -77,7 +106,7 @@
       margin-top: 25px;
       padding: 15px;
       border: none;
-      border-radius: 8px;
+      border-radius: 9px;
       background: #1f2933;
       color: white;
       font-size: 17px;
@@ -89,27 +118,44 @@
       opacity: 0.9;
     }
 
+    button:disabled {
+      opacity: 0.6;
+      cursor: wait;
+    }
+
     #result {
       display: none;
-      margin-top: 25px;
+      margin-top: 30px;
       padding: 25px;
       background: #f0f4ef;
-      border-radius: 12px;
+      border-radius: 14px;
     }
 
     #result h2 {
       margin-bottom: 15px;
     }
 
-    .trail {
-      margin-top: 15px;
-      padding: 18px;
-      background: white;
-      border-radius: 10px;
+    .match {
+      display: inline-block;
+      margin-bottom: 15px;
+      padding: 7px 12px;
+      border-radius: 20px;
+      background: #1f2933;
+      color: white;
+      font-size: 14px;
+      font-weight: bold;
     }
 
-    .trail strong {
-      font-size: 20px;
+    .trail {
+      padding: 22px;
+      background: white;
+      border-radius: 12px;
+    }
+
+    .trail-name {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 8px;
     }
 
     .trail p {
@@ -117,185 +163,617 @@
       color: #667085;
     }
 
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .stat {
+      padding: 15px;
+      background: #f5f7f4;
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 18px;
+      color: #1f2933;
+    }
+
+    .stat span {
+      font-size: 13px;
+      color: #667085;
+    }
+
+    .ai-box {
+      margin-top: 22px;
+      padding: 18px;
+      background: #f5f7f4;
+      border-radius: 10px;
+      border-left: 4px solid #1f2933;
+    }
+
+    .ai-title {
+      font-weight: bold;
+      margin-bottom: 6px;
+    }
+
     #map {
       width: 100%;
-      height: 400px;
+      height: 420px;
       margin-top: 25px;
       border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: #667085;
+    }
+
+    footer {
+      text-align: center;
+      padding: 30px;
+      color: #667085;
+      font-size: 14px;
+    }
+
+    @media (max-width: 600px) {
+      .hero h1 {
+        font-size: 36px;
+      }
+
+      .card {
+        padding: 22px;
+      }
+
+      .stats {
+        grid-template-columns: 1fr;
+      }
+
+      #map {
+        height: 330px;
+      }
     }
   </style>
-  
-  <link
-  rel="stylesheet"
-  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-  />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 
 <body>
 
-  <header>
-    <div class="logo">🥾 TrailMind</div>
-  </header>
+<header>
+  <div class="logo">🥾 TrailMind</div>
+</header>
 
-  <section class="hero">
-    <h1>Plan Your Next Adventure</h1>
-    <p>AI-powered outdoor trip planning for hikers.</p>
-  </section>
+<section class="hero">
+  <h1>Plan Your Next Adventure</h1>
+  <p>
+    AI-powered outdoor trip planning that helps you find
+    trails matched to your experience and preferences.
+  </p>
+</section>
 
-  <div class="container">
-    <div class="card">
+<div class="container">
 
-      <h2>Find a Trail</h2>
+  <div class="card">
 
-      <label for="location">Location</label>
-      <input
-        id="location"
-        type="text"
-        placeholder="e.g. Bay Area"
-      >
+    <h2>Find a Trail</h2>
 
-      <label for="activity">Activity</label>
-      <select id="activity">
-        <option>Hiking</option>
-        <option>Running</option>
-        <option>Cycling</option>
-      </select>
+    <p class="subtitle">
+      Tell TrailMind what kind of adventure you're looking for.
+    </p>
 
-      <label for="experience">Experience Level</label>
-      <select id="experience">
-        <option>Beginner</option>
-        <option>Intermediate</option>
-        <option>Advanced</option>
-      </select>
+    <label for="location">Location</label>
 
-      <label for="distance">Preferred Distance</label>
-      <select id="distance">
-        <option>Short (under 5 miles)</option>
-        <option>Medium (5-10 miles)</option>
-        <option>Long (10+ miles)</option>
-      </select>
+    <input
+      id="location"
+      type="text"
+      placeholder="e.g. Bay Area, California"
+    >
 
-      <button onclick="findTrail()">
-        ✨ Find My Trail
-      </button>
+    <label for="activity">Activity</label>
 
-      
-      <div id="result">
-        <h2>Recommended Trail</h2>
-        
-        <div id="map"></div>
-        
-        <div class="trail">
-          <strong>Mission Peak</strong>
-          <p>📍 Fremont, California</p>
-          <p>🥾 5.8 miles · Moderate</p>
-          <p>⛰️ Elevation gain: 2,100 ft</p>
-          <p>☀️ Great conditions for hiking</p>
+    <select id="activity">
+      <option>Hiking</option>
+      <option>Running</option>
+      <option>Cycling</option>
+    </select>
 
-          <br>
+    <label for="experience">Experience Level</label>
 
-          <strong>AI Recommendation</strong>
-          <p>
-            This trail is a good match based on your selected
-            experience level and preferred distance.
-          </p>
-        </div>
+    <select id="experience">
+      <option>Beginner</option>
+      <option>Intermediate</option>
+      <option>Advanced</option>
+    </select>
+
+    <label for="distance">Preferred Distance</label>
+
+    <select id="distance">
+      <option>Short (under 5 miles)</option>
+      <option>Medium (5-10 miles)</option>
+      <option>Long (10+ miles)</option>
+    </select>
+
+    <button id="searchButton" onclick="findTrail()">
+      ✨ Find My Trail
+    </button>
+
+    <div id="result">
+
+      <h2>Recommended Trail</h2>
+
+      <div id="matchScore" class="match">
+        95% Match
       </div>
 
+      <div class="trail">
+
+        <div id="trailName" class="trail-name">
+          Mission Peak
+        </div>
+
+        <p id="trailLocation">
+          📍 Fremont, California
+        </p>
+
+        <div class="stats">
+
+          <div class="stat">
+            <strong id="trailDistance">5.8 mi</strong>
+            <span>Distance</span>
+          </div>
+
+          <div class="stat">
+            <strong id="trailDifficulty">Moderate</strong>
+            <span>Difficulty</span>
+          </div>
+
+          <div class="stat">
+            <strong id="trailElevation">2,100 ft</strong>
+            <span>Elevation</span>
+          </div>
+
+        </div>
+
+        <div class="ai-box">
+
+          <div class="ai-title">
+            🤖 AI Recommendation
+          </div>
+
+          <p id="aiRecommendation">
+            This trail is a good match based on your
+            selected experience level and preferred distance.
+          </p>
+
+        </div>
+
+        <p id="conditions">
+          ☀️ Good conditions for outdoor activity
+        </p>
+
+      </div>
+
+      <div id="map"></div>
+
     </div>
+
   </div>
 
-  <script>
-  let map = L.map('map').setView([37.5126, -121.8800], 12);
+</div>
 
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; OpenStreetMap contributors'
-  }).addTo(map);
+<footer>
+  TrailMind · AI Outdoor Trip Planner
+</footer>
 
-  L.marker([37.5126, -121.8800])
-    .addTo(map)
-    .bindPopup('<b>Mission Peak</b><br>Fremont, California')
-    .openPopup();
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-  async function findTrail() {
-    const location = document.getElementById("location").value;
+<script>
 
-    if (location.trim() === "") {
-      alert("Please enter a location.");
-      return;
+  /* =========================
+     MAP SETUP
+  ========================= */
+
+  let map = L.map("map").setView(
+    [37.5126, -121.8800],
+    12
+  );
+
+  L.tileLayer(
+    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    {
+      attribution: "&copy; OpenStreetMap contributors"
+    }
+  ).addTo(map);
+
+  let trailMarker = L.marker(
+    [37.5126, -121.8800]
+  )
+  .addTo(map)
+  .bindPopup(
+    "<b>Mission Peak</b><br>Fremont, California"
+  );
+
+
+  /* =========================
+     TRAIL DATABASE
+  ========================= */
+
+  const trailData = [
+
+    {
+      name: "Rancho San Antonio",
+      location: "Cupertino, California",
+      distance: 3.4,
+      difficulty: "Easy",
+      elevation: "650 ft",
+      lat: 37.3197,
+      lon: -122.0753
+    },
+
+    {
+      name: "Mission Peak",
+      location: "Fremont, California",
+      distance: 5.8,
+      difficulty: "Moderate",
+      elevation: "2,100 ft",
+      lat: 37.5126,
+      lon: -121.8800
+    },
+
+    {
+      name: "Lake Chabot Loop",
+      location: "Castro Valley, California",
+      distance: 7.5,
+      difficulty: "Moderate",
+      elevation: "1,200 ft",
+      lat: 37.7300,
+      lon: -122.0580
+    },
+
+    {
+      name: "Mount Diablo Summit",
+      location: "Mount Diablo, California",
+      distance: 13.0,
+      difficulty: "Hard",
+      elevation: "3,500 ft",
+      lat: 37.8816,
+      lon: -121.9142
     }
 
-    try {
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(location)}`
+  ];
+
+
+  /* =========================
+     RECOMMENDATION ENGINE
+  ========================= */
+
+  function recommendTrail(experience, distance) {
+
+    let candidates = [...trailData];
+
+    if (experience === "Beginner") {
+
+      candidates = candidates.filter(
+        trail => trail.difficulty === "Easy"
       );
 
-    const data = await response.json();
+    } else if (experience === "Advanced") {
 
-    if (data.length === 0) {
-      alert("Location not found. Please try another location.");
-      return;
+      candidates = candidates.filter(
+        trail =>
+          trail.difficulty === "Hard" ||
+          trail.difficulty === "Moderate"
+      );
+
     }
 
-    const lat = parseFloat(data[0].lat);
-    const lon = parseFloat(data[0].lon);
+    if (distance.includes("Short")) {
 
-    map.setView([lat, lon], 12);
+      candidates.sort(
+        (a, b) => a.distance - b.distance
+      );
 
-    L.marker([lat, lon])
-      .addTo(map)
-      .bindPopup(`<b>${location}</b>`)
-      .openPopup();
+    } else if (distance.includes("Long")) {
 
-    const trailData = [
-      {
-        name: "Mission Peak",
-        location: "Fremont, California",
-        distance: "5.8 miles",
-        difficulty: "Moderate",
-        elevation: "2,100 ft"
-      },
-      {
-        name: "Lake Chabot Loop",
-        location: "Castro Valley, California",
-        distance: "7.5 miles",
-        difficulty: "Moderate",
-        elevation: "1,200 ft"
-      },
-      {
-        name: "Rancho San Antonio",
-        location: "Cupertino, California",
-        distance: "3.4 miles",
-        difficulty: "Easy",
-        elevation: "650 ft"
-      }
-    ];
+      candidates.sort(
+        (a, b) => b.distance - a.distance
+      );
 
-    const trailContainer = document.querySelector(".trail");
+    } else {
 
-    trailContainer.innerHTML = `
-      <strong>${trailData[0].name}</strong>
-      <p>📍 ${trailData[0].location}</p>
-      <p>🥾 ${trailData[0].distance} · ${trailData[0].difficulty}</p>
-      <p>⛰️ Elevation gain: ${trailData[0].elevation}</p>
+      candidates.sort(
+        (a, b) =>
+          Math.abs(a.distance - 7) -
+          Math.abs(b.distance - 7)
+      );
 
-      <br>
+    }
 
-      <strong>AI Recommendation</strong>
-      <p>
-        This trail is a good match based on your selected
-        experience level and preferred distance.
-      </p>
-    `;
-    document.getElementById("result").style.display = "block";
-    map.invalidateSize();
+    return candidates[0] || trailData[1];
 
-  } catch (error) {
-    console.error(error);
-    alert("Something went wrong. Please try again.");
   }
-}
+
+
+  /* =========================
+     MAIN SEARCH FUNCTION
+  ========================= */
+
+  async function findTrail() {
+
+    const locationInput =
+      document.getElementById("location");
+
+    const location =
+      locationInput.value.trim();
+
+    const activity =
+      document.getElementById("activity").value;
+
+    const experience =
+      document.getElementById("experience").value;
+
+    const distance =
+      document.getElementById("distance").value;
+
+    const button =
+      document.getElementById("searchButton");
+
+
+    if (location === "") {
+
+      alert("Please enter a location.");
+
+      return;
+
+    }
+
+
+    button.disabled = true;
+
+    button.textContent = "🔎 Finding your trail...";
+
+
+    try {
+
+      /* =========================
+         LOCATION SEARCH
+      ========================= */
+
+      const response = await fetch(
+
+        "https://nominatim.openstreetmap.org/search" +
+        "?format=json&q=" +
+        encodeURIComponent(location)
+
+      );
+
+      const data =
+        await response.json();
+
+
+      if (data.length === 0) {
+
+        alert(
+          "Location not found. Please try another location."
+        );
+
+        return;
+
+      }
+
+
+      const lat =
+        parseFloat(data[0].lat);
+
+      const lon =
+        parseFloat(data[0].lon);
+
+
+      /* =========================
+         RECOMMEND TRAIL
+      ========================= */
+
+      const trail =
+        recommendTrail(
+          experience,
+          distance
+        );
+
+
+      /* =========================
+         MAP UPDATE
+      ========================= */
+
+      map.setView(
+        [lat, lon],
+        11
+      );
+
+
+      L.marker([lat, lon])
+        .addTo(map)
+        .bindPopup(
+          `<b>${location}</b><br>Search location`
+        )
+        .openPopup();
+
+
+      trailMarker
+        .setLatLng([
+          trail.lat,
+          trail.lon
+        ])
+        .bindPopup(
+          `<b>${trail.name}</b><br>${trail.location}`
+        );
+
+
+      /* =========================
+         UPDATE RESULT
+      ========================= */
+
+      document.getElementById(
+        "trailName"
+      ).textContent =
+        trail.name;
+
+
+      document.getElementById(
+        "trailLocation"
+      ).textContent =
+        "📍 " + trail.location;
+
+
+      document.getElementById(
+        "trailDistance"
+      ).textContent =
+        trail.distance + " mi";
+
+
+      document.getElementById(
+        "trailDifficulty"
+      ).textContent =
+        trail.difficulty;
+
+
+      document.getElementById(
+        "trailElevation"
+      ).textContent =
+        trail.elevation;
+
+
+      /* =========================
+         MATCH SCORE
+      ========================= */
+
+      let score = 82;
+
+      if (
+        experience === "Beginner" &&
+        trail.difficulty === "Easy"
+      ) {
+        score += 10;
+      }
+
+      if (
+        experience === "Advanced" &&
+        trail.difficulty === "Hard"
+      ) {
+        score += 10;
+      }
+
+      if (
+        distance.includes("Short") &&
+        trail.distance < 5
+      ) {
+        score += 8;
+      }
+
+      if (
+        distance.includes("Medium") &&
+        trail.distance >= 5 &&
+        trail.distance <= 10
+      ) {
+        score += 8;
+      }
+
+      if (
+        distance.includes("Long") &&
+        trail.distance > 10
+      ) {
+        score += 8;
+      }
+
+      score = Math.min(score, 98);
+
+
+      document.getElementById(
+        "matchScore"
+      ).textContent =
+        score + "% Match";
+
+
+      /* =========================
+         AI RECOMMENDATION
+      ========================= */
+
+      let recommendation =
+        `Based on your ${experience.toLowerCase()} experience level, ` +
+        `${activity.toLowerCase()} preference, and desire for ` +
+        `${distance.toLowerCase()}, ${trail.name} is a strong match. `;
+
+      if (trail.difficulty === "Easy") {
+
+        recommendation +=
+          "Its easier terrain makes it a good option for a relaxed adventure.";
+
+      } else if (trail.difficulty === "Moderate") {
+
+        recommendation +=
+          "The moderate terrain provides a good balance of challenge and accessibility.";
+
+      } else {
+
+        recommendation +=
+          "The challenging terrain makes it better suited for experienced outdoor enthusiasts.";
+
+      }
+
+
+      document.getElementById(
+        "aiRecommendation"
+      ).textContent =
+        recommendation;
+
+
+      /* =========================
+         CONDITIONS
+      ========================= */
+
+      document.getElementById(
+        "conditions"
+      ).textContent =
+        "☀️ Good conditions for outdoor activity";
+
+
+      /* =========================
+         SHOW RESULT
+      ========================= */
+
+      document.getElementById(
+        "result"
+      ).style.display =
+        "block";
+
+
+      map.invalidateSize();
+
+
+    } catch (error) {
+
+      console.error(error);
+
+      alert(
+        "Something went wrong. Please try again."
+      );
+
+    } finally {
+
+      button.disabled = false;
+
+      button.textContent =
+        "✨ Find My Trail";
+
+    }
+
+  }
+
 </script>
+
 </body>
 </html>
