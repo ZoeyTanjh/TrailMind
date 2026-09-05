@@ -1526,187 +1526,217 @@
     /* =========================
        CALCULATE MATCH SCORE
     ========================= */
-
+    
     function calculateMatchScore(
       trail,
       experience,
       distancePreference
     ) {
-
-      let score = 50;
-
-
+    
+      let score = 45;
+    
+    
       /* =========================
          EXPERIENCE MATCH
       ========================= */
-
+    
       if (
         experience === "Beginner" &&
         trail.difficulty === "Easy"
       ) {
-
-        score += 28;
-
+    
+        score += 22;
+    
       }
-
+    
       else if (
         experience === "Intermediate" &&
         trail.difficulty === "Moderate"
       ) {
-
-        score += 28;
-
+    
+        score += 22;
+    
       }
-
+    
       else if (
         experience === "Advanced" &&
         trail.difficulty === "Hard"
       ) {
-
-        score += 28;
-
+    
+        score += 22;
+    
       }
-
+    
       else if (
         experience === "Intermediate" &&
         trail.difficulty === "Easy"
       ) {
-
-        score += 20;
-
+    
+        score += 16;
+    
       }
-
+    
       else if (
         experience === "Advanced" &&
         trail.difficulty === "Moderate"
       ) {
-
-        score += 20;
-
+    
+        score += 16;
+    
       }
-
+    
       else {
-
-        score += 10;
-
+    
+        score += 8;
+    
       }
-
-
+    
+    
       /* =========================
          DISTANCE MATCH
       ========================= */
-
+    
       const distance =
         Number(
           trail.distance || 0
         );
-
-
+    
+    
       if (
         distancePreference ===
         "Short (under 5 miles)"
       ) {
-
+    
         if (
-          distance < 2
+          distance >= 2 &&
+          distance < 4
         ) {
-
-          score += 17;
-
+    
+          score += 20;
+    
         }
-
+    
         else if (
-          distance < 3.5
-        ) {
-
-          score += 15;
-
-        }
-
-        else if (
+          distance >= 1 &&
           distance < 5
         ) {
-
-          score += 11;
-
+    
+          score += 16;
+    
         }
-
+    
+        else if (
+          distance >= 0.5 &&
+          distance < 1
+        ) {
+    
+          score += 10;
+    
+        }
+    
+        else if (
+          distance < 0.5
+        ) {
+    
+          score += 4;
+    
+        }
+    
         else {
-
-          score += 3;
-
+    
+          score += 0;
+    
         }
-
+    
       }
-
-
+    
+    
       else if (
         distancePreference ===
         "Medium (5-10 miles)"
       ) {
-
+    
         if (
           distance >= 6 &&
           distance <= 9
         ) {
-
-          score += 17;
-
+    
+          score += 20;
+    
         }
-
+    
         else if (
           distance >= 5 &&
           distance <= 10
         ) {
-
-          score += 14;
-
+    
+          score += 17;
+    
         }
-
+    
         else {
-
-          score += 4;
-
+    
+          score += 3;
+    
         }
-
+    
       }
-
-
+    
+    
       else if (
         distancePreference ===
         "Long (10+ miles)"
       ) {
-
+    
         if (
           distance >= 12
         ) {
-
-          score += 17;
-
+    
+          score += 20;
+    
         }
-
+    
         else if (
           distance >= 10
         ) {
-
-          score += 14;
-
+    
+          score += 17;
+    
         }
-
+    
         else {
-
-          score += 4;
-
+    
+          score += 3;
+    
         }
-
+    
       }
-
-
+    
+    
+      /* =========================
+         TRAIL QUALITY
+      ========================= */
+    
+      if (
+        trail.isRelation
+      ) {
+    
+        score += 8;
+    
+      }
+    
+      else {
+    
+        score += 3;
+    
+      }
+    
+    
       /* =========================
          SMALL DETERMINISTIC
-         VARIATION
+         DIFFERENCE
       ========================= */
-
+    
       const nameValue =
         String(
           trail.name || ""
@@ -1721,20 +1751,20 @@
               character.charCodeAt(0),
             0
           );
-
-
+    
+    
       score +=
-        nameValue % 6;
-
-
+        nameValue % 5;
+    
+    
       return Math.min(
-        98,
+        97,
         Math.max(
           55,
           Math.round(score)
         )
       );
-
+    
     }
 
 
