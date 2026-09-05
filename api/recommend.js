@@ -1,8 +1,12 @@
 /* =========================
-   CORS
+   TrailMind Recommendation API
 ========================= */
 
 export default async function handler(req, res) {
+
+  /* =========================
+     CORS
+  ========================= */
 
   res.setHeader(
     "Access-Control-Allow-Origin",
@@ -17,6 +21,11 @@ export default async function handler(req, res) {
   res.setHeader(
     "Access-Control-Allow-Headers",
     "Content-Type"
+  );
+
+  res.setHeader(
+    "Access-Control-Max-Age",
+    "86400"
   );
 
 
@@ -38,7 +47,10 @@ export default async function handler(req, res) {
   if (req.method !== "POST") {
 
     return res.status(405).json({
-      error: "Method not allowed"
+
+      error:
+        "Method not allowed"
+
     });
 
   }
@@ -61,27 +73,34 @@ export default async function handler(req, res) {
     if (!trail) {
 
       return res.status(400).json({
-        error: "Trail data is required"
+
+        error:
+          "Trail data is required"
+
       });
 
     }
 
 
     /* =========================
-       USE THE EXACT TRAIL DISTANCE
-       FROM THE FRONTEND
+       USE EXACT FRONTEND DATA
     ========================= */
 
     const trailDistance =
-      Number(trail.distance || 0);
+      Number(
+        trail.distance || 0
+      );
 
 
     const trailDifficulty =
-      trail.difficulty || "Unknown";
+      trail.difficulty ||
+      "Unknown";
 
 
     const currentWeather =
-      String(weather || "");
+      String(
+        weather || ""
+      );
 
 
     const lowerWeather =
@@ -89,7 +108,7 @@ export default async function handler(req, res) {
 
 
     /* =========================
-       EXPERIENCE MATCH
+       EXPERIENCE SCORE
     ========================= */
 
     let experienceScore = 0;
@@ -97,9 +116,13 @@ export default async function handler(req, res) {
     let experienceText = "";
 
 
-    if (experience === "Beginner") {
+    if (
+      experience === "Beginner"
+    ) {
 
-      if (trailDifficulty === "Easy") {
+      if (
+        trailDifficulty === "Easy"
+      ) {
 
         experienceScore = 45;
 
@@ -108,7 +131,9 @@ export default async function handler(req, res) {
 
       }
 
-      else if (trailDifficulty === "Moderate") {
+      else if (
+        trailDifficulty === "Moderate"
+      ) {
 
         experienceScore = 30;
 
@@ -129,9 +154,13 @@ export default async function handler(req, res) {
     }
 
 
-    else if (experience === "Intermediate") {
+    else if (
+      experience === "Intermediate"
+    ) {
 
-      if (trailDifficulty === "Moderate") {
+      if (
+        trailDifficulty === "Moderate"
+      ) {
 
         experienceScore = 45;
 
@@ -140,7 +169,9 @@ export default async function handler(req, res) {
 
       }
 
-      else if (trailDifficulty === "Easy") {
+      else if (
+        trailDifficulty === "Easy"
+      ) {
 
         experienceScore = 35;
 
@@ -151,7 +182,7 @@ export default async function handler(req, res) {
 
       else {
 
-        experienceScore = 30;
+        experienceScore = 40;
 
         experienceText =
           "The hard difficulty provides a more demanding option for an intermediate hiker.";
@@ -161,9 +192,13 @@ export default async function handler(req, res) {
     }
 
 
-    else if (experience === "Advanced") {
+    else if (
+      experience === "Advanced"
+    ) {
 
-      if (trailDifficulty === "Hard") {
+      if (
+        trailDifficulty === "Hard"
+      ) {
 
         experienceScore = 45;
 
@@ -172,7 +207,9 @@ export default async function handler(req, res) {
 
       }
 
-      else if (trailDifficulty === "Moderate") {
+      else if (
+        trailDifficulty === "Moderate"
+      ) {
 
         experienceScore = 35;
 
@@ -204,7 +241,7 @@ export default async function handler(req, res) {
 
 
     /* =========================
-       DISTANCE MATCH
+       DISTANCE SCORE
     ========================= */
 
     let distanceScore = 0;
@@ -217,18 +254,26 @@ export default async function handler(req, res) {
       "Short (under 5 miles)"
     ) {
 
+      const targetDistance = 3;
+
       const difference =
-        Math.abs(3 - trailDistance);
+        Math.abs(
+          targetDistance -
+          trailDistance
+        );
 
 
       distanceScore =
         Math.max(
-          10,
-          40 - difference * 8
+          5,
+          40 -
+          difference * 8
         );
 
 
-      if (trailDistance < 5) {
+      if (
+        trailDistance < 5
+      ) {
 
         distanceText =
           `At ${trailDistance.toFixed(1)} miles, the distance matches your preference for a shorter outing.`;
@@ -250,18 +295,20 @@ export default async function handler(req, res) {
       "Medium (5-10 miles)"
     ) {
 
-      const target = 7.5;
+      const targetDistance = 7.5;
 
       const difference =
         Math.abs(
-          target - trailDistance
+          targetDistance -
+          trailDistance
         );
 
 
       distanceScore =
         Math.max(
-          10,
-          40 - difference * 6
+          5,
+          40 -
+          difference * 6
         );
 
 
@@ -290,22 +337,26 @@ export default async function handler(req, res) {
       "Long (10+ miles)"
     ) {
 
-      const target = 12;
+      const targetDistance = 12;
 
       const difference =
         Math.abs(
-          target - trailDistance
+          targetDistance -
+          trailDistance
         );
 
 
       distanceScore =
         Math.max(
-          10,
-          40 - difference * 4
+          5,
+          40 -
+          difference * 4
         );
 
 
-      if (trailDistance >= 10) {
+      if (
+        trailDistance >= 10
+      ) {
 
         distanceText =
           `At ${trailDistance.toFixed(1)} miles, the trail fits your preference for a longer adventure.`;
@@ -333,7 +384,7 @@ export default async function handler(req, res) {
 
 
     /* =========================
-       WEATHER
+       WEATHER SCORE
     ========================= */
 
     let weatherScore = 10;
@@ -343,8 +394,12 @@ export default async function handler(req, res) {
 
 
     if (
-      lowerWeather.includes("thunderstorm") ||
-      lowerWeather.includes("storm")
+      lowerWeather.includes(
+        "thunderstorm"
+      ) ||
+      lowerWeather.includes(
+        "storm"
+      )
     ) {
 
       weatherScore = 0;
@@ -356,7 +411,9 @@ export default async function handler(req, res) {
 
 
     else if (
-      lowerWeather.includes("snow")
+      lowerWeather.includes(
+        "snow"
+      )
     ) {
 
       weatherScore = 3;
@@ -368,7 +425,9 @@ export default async function handler(req, res) {
 
 
     else if (
-      lowerWeather.includes("rain")
+      lowerWeather.includes(
+        "rain"
+      )
     ) {
 
       weatherScore = 5;
@@ -380,7 +439,9 @@ export default async function handler(req, res) {
 
 
     else if (
-      lowerWeather.includes("wind")
+      lowerWeather.includes(
+        "wind"
+      )
     ) {
 
       weatherScore = 7;
@@ -401,7 +462,8 @@ export default async function handler(req, res) {
 
 
     if (
-      trail.source === "OpenStreetMap"
+      trail.source ===
+      "OpenStreetMap"
     ) {
 
       sourceText =
@@ -411,7 +473,7 @@ export default async function handler(req, res) {
 
 
     /* =========================
-       FINAL MATCH SCORE
+       FINAL SCORE
     ========================= */
 
     let matchScore =
@@ -422,11 +484,17 @@ export default async function handler(req, res) {
 
 
     matchScore =
+      Math.round(
+        matchScore
+      );
+
+
+    matchScore =
       Math.min(
         98,
         Math.max(
           55,
-          Math.round(matchScore)
+          matchScore
         )
       );
 
@@ -440,7 +508,7 @@ export default async function handler(req, res) {
 
 
     /* =========================
-       RETURN
+       RESPONSE
     ========================= */
 
     return res.status(200).json({
