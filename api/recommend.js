@@ -25,7 +25,9 @@ export default async function handler(req, res) {
   ========================= */
 
   if (req.method === "OPTIONS") {
+
     return res.status(200).end();
+
   }
 
 
@@ -34,16 +36,21 @@ export default async function handler(req, res) {
   ========================= */
 
   if (req.method !== "POST") {
+
     return res.status(405).json({
-      error: "Method not allowed"
+
+      error:
+        "Method not allowed"
+
     });
+
   }
 
 
   try {
 
     /* =========================
-       GET REQUEST DATA
+       REQUEST DATA
     ========================= */
 
     const {
@@ -54,120 +61,302 @@ export default async function handler(req, res) {
     } = req.body;
 
 
+    if (!trail) {
+
+      return res.status(400).json({
+
+        error:
+          "Trail data is required"
+
+      });
+
+    }
+
+
+    const trailDistance =
+      Number(
+        trail.distance || 0
+      );
+
+
+    const trailDifficulty =
+      trail.difficulty ||
+      "Unknown";
+
+
+    const currentWeather =
+      String(
+        weather || ""
+      );
+
+
+    const lowerWeather =
+      currentWeather.toLowerCase();
+
+
     /* =========================
-       EXPERIENCE ANALYSIS
+       EXPERIENCE
     ========================= */
 
     let experienceText = "";
 
-    if (experience === "beginner") {
+
+    if (
+      experience === "Beginner"
+    ) {
+
+      if (
+        trailDifficulty === "Easy"
+      ) {
+
+        experienceText =
+          "The easy difficulty is a good fit for a beginner.";
+
+      }
+
+      else if (
+        trailDifficulty === "Moderate"
+      ) {
+
+        experienceText =
+          "The moderate difficulty offers some challenge for a beginner, so pacing and preparation are important.";
+
+      }
+
+      else {
+
+        experienceText =
+          "The trail may be demanding for a beginner and should be approached with extra preparation.";
+
+      }
+
+    }
+
+
+    else if (
+      experience === "Intermediate"
+    ) {
+
+      if (
+        trailDifficulty === "Moderate"
+      ) {
+
+        experienceText =
+          "The moderate difficulty is a strong match for an intermediate hiker.";
+
+      }
+
+      else if (
+        trailDifficulty === "Easy"
+      ) {
+
+        experienceText =
+          "The easy difficulty makes this a relatively accessible option for an intermediate hiker.";
+
+      }
+
+      else {
+
+        experienceText =
+          "The hard difficulty provides a more demanding option for an intermediate hiker.";
+
+      }
+
+    }
+
+
+    else if (
+      experience === "Advanced"
+    ) {
+
+      if (
+        trailDifficulty === "Hard"
+      ) {
+
+        experienceText =
+          "The hard difficulty provides a strong challenge for an advanced hiker.";
+
+      }
+
+      else {
+
+        experienceText =
+          "The trail is relatively accessible for an advanced hiker and may be suitable for a lighter outing.";
+
+      }
+
+    }
+
+
+    else {
 
       experienceText =
-        "As a beginner, this trail offers a manageable option without being overly demanding.";
-
-    } else if (experience === "intermediate") {
-
-      experienceText =
-        "For an intermediate hiker, this trail provides a good balance of challenge and accessibility.";
-
-    } else if (experience === "advanced") {
-
-      experienceText =
-        "For an experienced hiker, this trail provides a good outdoor challenge.";
-
-    } else {
-
-      experienceText =
-        "This trail can be a practical option based on your selected experience level.";
+        "The trail was selected based on your available preferences.";
 
     }
 
 
     /* =========================
-       DISTANCE ANALYSIS
+       DISTANCE
     ========================= */
 
     let distanceText = "";
 
-    if (distancePreference === "short") {
 
-      if (trail.distance <= 5) {
-
-        distanceText =
-          "Its shorter distance also matches your preference for a quick outing.";
-
-      } else {
-
-        distanceText =
-          "The trail is somewhat longer than your preferred short distance.";
-
-      }
-
-    } else if (distancePreference === "medium") {
+    if (
+      distancePreference ===
+      "Short (under 5 miles)"
+    ) {
 
       if (
-        trail.distance > 5 &&
-        trail.distance <= 10
+        trailDistance < 5
       ) {
 
         distanceText =
-          "Its distance fits well with your preference for a medium-length hike.";
-
-      } else {
-
-        distanceText =
-          "Its distance is somewhat different from your preferred medium-length hike.";
+          `At ${trailDistance} miles, the distance matches your preference for a shorter outing.`;
 
       }
 
-    } else if (distancePreference === "long") {
-
-      if (trail.distance > 10) {
+      else {
 
         distanceText =
-          "Its longer distance makes it a strong match for a longer outdoor adventure.";
-
-      } else {
-
-        distanceText =
-          "The trail is shorter than your preferred long-distance outing.";
+          `At ${trailDistance} miles, the trail is longer than your preferred short outing.`;
 
       }
 
-    } else {
+    }
+
+
+    else if (
+      distancePreference ===
+      "Medium (5-10 miles)"
+    ) {
+
+      if (
+        trailDistance >= 5 &&
+        trailDistance <= 10
+      ) {
+
+        distanceText =
+          `At ${trailDistance} miles, the distance fits your preferred medium-length hike.`;
+
+      }
+
+      else {
+
+        distanceText =
+          `At ${trailDistance} miles, the trail is outside your preferred 5-10 mile range.`;
+
+      }
+
+    }
+
+
+    else if (
+      distancePreference ===
+      "Long (10+ miles)"
+    ) {
+
+      if (
+        trailDistance > 10
+      ) {
+
+        distanceText =
+          `At ${trailDistance} miles, the trail fits your preference for a longer adventure.`;
+
+      }
+
+      else {
+
+        distanceText =
+          `At ${trailDistance} miles, the trail is shorter than your preferred long-distance outing.`;
+
+      }
+
+    }
+
+
+    else {
 
       distanceText =
-        "The trail distance provides a reasonable option for your preferences.";
+        `The trail distance is approximately ${trailDistance} miles.`;
 
     }
 
 
     /* =========================
-       WEATHER ANALYSIS
+       WEATHER
     ========================= */
 
     let weatherText =
-      "Current conditions appear reasonable for an outdoor activity.";
-
-    const lowerWeather =
-      String(weather).toLowerCase();
+      "Current weather conditions appear reasonable for outdoor activity.";
 
 
     if (
-      lowerWeather.includes("rain") ||
-      lowerWeather.includes("storm") ||
-      lowerWeather.includes("snow")
+      lowerWeather.includes(
+        "thunderstorm"
+      ) ||
+      lowerWeather.includes(
+        "storm"
+      )
     ) {
 
       weatherText =
-        "Current weather conditions may make the trail less suitable, so check conditions carefully before heading out.";
+        "Thunderstorm or storm conditions may make the trail unsuitable, so current conditions should be checked before starting.";
 
-    } else if (
-      lowerWeather.includes("wind")
+    }
+
+
+    else if (
+      lowerWeather.includes(
+        "snow"
+      )
     ) {
 
       weatherText =
-        "Wind conditions should be considered before starting the hike.";
+        "Snow conditions may affect trail safety and accessibility, so conditions should be checked before starting.";
+
+    }
+
+
+    else if (
+      lowerWeather.includes(
+        "rain"
+      )
+    ) {
+
+      weatherText =
+        "Rain may make the trail wet or slippery, so current trail conditions should be considered.";
+
+    }
+
+
+    else if (
+      lowerWeather.includes(
+        "wind"
+      )
+    ) {
+
+      weatherText =
+        "Wind conditions should be considered, especially on exposed sections of the trail.";
+
+    }
+
+
+    /* =========================
+       SOURCE
+    ========================= */
+
+    let sourceText = "";
+
+
+    if (
+      trail.source ===
+      "OpenStreetMap"
+    ) {
+
+      sourceText =
+        "The trail information is based on real OpenStreetMap data.";
 
     }
 
@@ -177,11 +366,11 @@ export default async function handler(req, res) {
     ========================= */
 
     const recommendation =
-      `${experienceText} ${distanceText} ${weatherText}`;
+      `${experienceText} ${distanceText} ${weatherText} ${sourceText}`;
 
 
     /* =========================
-       RETURN RESULT
+       RETURN
     ========================= */
 
     return res.status(200).json({
@@ -191,8 +380,10 @@ export default async function handler(req, res) {
 
     });
 
+  }
 
-  } catch (error) {
+
+  catch (error) {
 
     /* =========================
        ERROR HANDLING
