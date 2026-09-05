@@ -1150,6 +1150,52 @@ async function findTrail() {
 
 
     /* =========================
+       WEATHER
+    ========================= */
+
+    const weatherResponse =
+      await fetch(
+
+        `https://api.open-meteo.com/v1/forecast?latitude=${trail.lat}&longitude=${trail.lon}&current=temperature_2m,weather_code,wind_speed_10m&temperature_unit=fahrenheit&wind_speed_unit=mph`
+
+      );
+
+
+    const weatherData =
+      await weatherResponse.json();
+
+
+    const temperature =
+      Math.round(
+        weatherData.current
+          .temperature_2m
+      );
+
+
+    const wind =
+      Math.round(
+        weatherData.current
+          .wind_speed_10m
+      );
+
+
+    const weatherInfo =
+      getWeatherDescription(
+        weatherData.current
+          .weather_code
+      );
+
+    const weatherText =
+       `${temperature}°F, ${weatherInfo.text}, Wind ${wind} mph`;
+
+
+    document.getElementById(
+      "conditions"
+    ).textContent =
+      `${weatherInfo.icon} ${temperature}°F · ${weatherInfo.text} · Wind ${wind} mph`;
+    
+
+    /* =========================
        AI RECOMMENDATION
     ========================= */
     
@@ -1201,52 +1247,6 @@ async function findTrail() {
         "AI recommendation is temporarily unavailable.";
     
     }
-
-
-    /* =========================
-       WEATHER
-    ========================= */
-
-    const weatherResponse =
-      await fetch(
-
-        `https://api.open-meteo.com/v1/forecast?latitude=${trail.lat}&longitude=${trail.lon}&current=temperature_2m,weather_code,wind_speed_10m&temperature_unit=fahrenheit&wind_speed_unit=mph`
-
-      );
-
-
-    const weatherData =
-      await weatherResponse.json();
-
-
-    const temperature =
-      Math.round(
-        weatherData.current
-          .temperature_2m
-      );
-
-
-    const wind =
-      Math.round(
-        weatherData.current
-          .wind_speed_10m
-      );
-
-
-    const weatherInfo =
-      getWeatherDescription(
-        weatherData.current
-          .weather_code
-      );
-
-    const weatherText =
-       `${temperature}°F, ${weatherInfo.text}, Wind ${wind} mph`;
-
-
-    document.getElementById(
-      "conditions"
-    ).textContent =
-      `${weatherInfo.icon} ${temperature}°F · ${weatherInfo.text} · Wind ${wind} mph`;
 
 
     /* =========================
