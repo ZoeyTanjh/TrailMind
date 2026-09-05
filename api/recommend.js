@@ -38,10 +38,7 @@ export default async function handler(req, res) {
   if (req.method !== "POST") {
 
     return res.status(405).json({
-
-      error:
-        "Method not allowed"
-
+      error: "Method not allowed"
     });
 
   }
@@ -64,30 +61,27 @@ export default async function handler(req, res) {
     if (!trail) {
 
       return res.status(400).json({
-
-        error:
-          "Trail data is required"
-
+        error: "Trail data is required"
       });
 
     }
 
 
+    /* =========================
+       USE THE EXACT TRAIL DISTANCE
+       FROM THE FRONTEND
+    ========================= */
+
     const trailDistance =
-      Number(
-        trail.distance || 0
-      );
+      Number(trail.distance || 0);
 
 
     const trailDifficulty =
-      trail.difficulty ||
-      "Unknown";
+      trail.difficulty || "Unknown";
 
 
     const currentWeather =
-      String(
-        weather || ""
-      );
+      String(weather || "");
 
 
     const lowerWeather =
@@ -95,28 +89,28 @@ export default async function handler(req, res) {
 
 
     /* =========================
-       EXPERIENCE
+       EXPERIENCE MATCH
     ========================= */
+
+    let experienceScore = 0;
 
     let experienceText = "";
 
 
-    if (
-      experience === "Beginner"
-    ) {
+    if (experience === "Beginner") {
 
-      if (
-        trailDifficulty === "Easy"
-      ) {
+      if (trailDifficulty === "Easy") {
+
+        experienceScore = 45;
 
         experienceText =
-          "The easy difficulty is a good fit for a beginner.";
+          "The easy difficulty is a strong match for a beginner.";
 
       }
 
-      else if (
-        trailDifficulty === "Moderate"
-      ) {
+      else if (trailDifficulty === "Moderate") {
+
+        experienceScore = 30;
 
         experienceText =
           "The moderate difficulty offers some challenge for a beginner, so pacing and preparation are important.";
@@ -125,30 +119,30 @@ export default async function handler(req, res) {
 
       else {
 
+        experienceScore = 15;
+
         experienceText =
-          "The trail may be demanding for a beginner and should be approached with extra preparation.";
+          "The trail may be demanding for a beginner and requires extra preparation.";
 
       }
 
     }
 
 
-    else if (
-      experience === "Intermediate"
-    ) {
+    else if (experience === "Intermediate") {
 
-      if (
-        trailDifficulty === "Moderate"
-      ) {
+      if (trailDifficulty === "Moderate") {
+
+        experienceScore = 45;
 
         experienceText =
           "The moderate difficulty is a strong match for an intermediate hiker.";
 
       }
 
-      else if (
-        trailDifficulty === "Easy"
-      ) {
+      else if (trailDifficulty === "Easy") {
+
+        experienceScore = 35;
 
         experienceText =
           "The easy difficulty makes this a relatively accessible option for an intermediate hiker.";
@@ -156,6 +150,8 @@ export default async function handler(req, res) {
       }
 
       else {
+
+        experienceScore = 30;
 
         experienceText =
           "The hard difficulty provides a more demanding option for an intermediate hiker.";
@@ -165,23 +161,32 @@ export default async function handler(req, res) {
     }
 
 
-    else if (
-      experience === "Advanced"
-    ) {
+    else if (experience === "Advanced") {
 
-      if (
-        trailDifficulty === "Hard"
-      ) {
+      if (trailDifficulty === "Hard") {
+
+        experienceScore = 45;
 
         experienceText =
-          "The hard difficulty provides a strong challenge for an advanced hiker.";
+          "The hard difficulty is a strong match for an advanced hiker.";
+
+      }
+
+      else if (trailDifficulty === "Moderate") {
+
+        experienceScore = 35;
+
+        experienceText =
+          "The moderate difficulty provides a manageable option for an advanced hiker.";
 
       }
 
       else {
 
+        experienceScore = 25;
+
         experienceText =
-          "The trail is relatively accessible for an advanced hiker and may be suitable for a lighter outing.";
+          "The easy difficulty makes this a relatively accessible outing for an advanced hiker.";
 
       }
 
@@ -190,6 +195,8 @@ export default async function handler(req, res) {
 
     else {
 
+      experienceScore = 30;
+
       experienceText =
         "The trail was selected based on your available preferences.";
 
@@ -197,8 +204,10 @@ export default async function handler(req, res) {
 
 
     /* =========================
-       DISTANCE
+       DISTANCE MATCH
     ========================= */
+
+    let distanceScore = 0;
 
     let distanceText = "";
 
@@ -208,19 +217,28 @@ export default async function handler(req, res) {
       "Short (under 5 miles)"
     ) {
 
-      if (
-        trailDistance < 5
-      ) {
+      const difference =
+        Math.abs(3 - trailDistance);
+
+
+      distanceScore =
+        Math.max(
+          10,
+          40 - difference * 8
+        );
+
+
+      if (trailDistance < 5) {
 
         distanceText =
-          `At ${trailDistance} miles, the distance matches your preference for a shorter outing.`;
+          `At ${trailDistance.toFixed(1)} miles, the distance matches your preference for a shorter outing.`;
 
       }
 
       else {
 
         distanceText =
-          `At ${trailDistance} miles, the trail is longer than your preferred short outing.`;
+          `At ${trailDistance.toFixed(1)} miles, the trail is longer than your preferred short outing.`;
 
       }
 
@@ -232,20 +250,35 @@ export default async function handler(req, res) {
       "Medium (5-10 miles)"
     ) {
 
+      const target = 7.5;
+
+      const difference =
+        Math.abs(
+          target - trailDistance
+        );
+
+
+      distanceScore =
+        Math.max(
+          10,
+          40 - difference * 6
+        );
+
+
       if (
         trailDistance >= 5 &&
         trailDistance <= 10
       ) {
 
         distanceText =
-          `At ${trailDistance} miles, the distance fits your preferred medium-length hike.`;
+          `At ${trailDistance.toFixed(1)} miles, the distance fits your preferred medium-length hike.`;
 
       }
 
       else {
 
         distanceText =
-          `At ${trailDistance} miles, the trail is outside your preferred 5-10 mile range.`;
+          `At ${trailDistance.toFixed(1)} miles, the trail is outside your preferred 5-10 mile range.`;
 
       }
 
@@ -257,19 +290,32 @@ export default async function handler(req, res) {
       "Long (10+ miles)"
     ) {
 
-      if (
-        trailDistance > 10
-      ) {
+      const target = 12;
+
+      const difference =
+        Math.abs(
+          target - trailDistance
+        );
+
+
+      distanceScore =
+        Math.max(
+          10,
+          40 - difference * 4
+        );
+
+
+      if (trailDistance >= 10) {
 
         distanceText =
-          `At ${trailDistance} miles, the trail fits your preference for a longer adventure.`;
+          `At ${trailDistance.toFixed(1)} miles, the trail fits your preference for a longer adventure.`;
 
       }
 
       else {
 
         distanceText =
-          `At ${trailDistance} miles, the trail is shorter than your preferred long-distance outing.`;
+          `At ${trailDistance.toFixed(1)} miles, the trail is shorter than your preferred long-distance outing.`;
 
       }
 
@@ -278,8 +324,10 @@ export default async function handler(req, res) {
 
     else {
 
+      distanceScore = 25;
+
       distanceText =
-        `The trail distance is approximately ${trailDistance} miles.`;
+        `The trail distance is approximately ${trailDistance.toFixed(1)} miles.`;
 
     }
 
@@ -288,18 +336,18 @@ export default async function handler(req, res) {
        WEATHER
     ========================= */
 
+    let weatherScore = 10;
+
     let weatherText =
       "Current weather conditions appear reasonable for outdoor activity.";
 
 
     if (
-      lowerWeather.includes(
-        "thunderstorm"
-      ) ||
-      lowerWeather.includes(
-        "storm"
-      )
+      lowerWeather.includes("thunderstorm") ||
+      lowerWeather.includes("storm")
     ) {
+
+      weatherScore = 0;
 
       weatherText =
         "Thunderstorm or storm conditions may make the trail unsuitable, so current conditions should be checked before starting.";
@@ -308,10 +356,10 @@ export default async function handler(req, res) {
 
 
     else if (
-      lowerWeather.includes(
-        "snow"
-      )
+      lowerWeather.includes("snow")
     ) {
+
+      weatherScore = 3;
 
       weatherText =
         "Snow conditions may affect trail safety and accessibility, so conditions should be checked before starting.";
@@ -320,10 +368,10 @@ export default async function handler(req, res) {
 
 
     else if (
-      lowerWeather.includes(
-        "rain"
-      )
+      lowerWeather.includes("rain")
     ) {
+
+      weatherScore = 5;
 
       weatherText =
         "Rain may make the trail wet or slippery, so current trail conditions should be considered.";
@@ -332,10 +380,10 @@ export default async function handler(req, res) {
 
 
     else if (
-      lowerWeather.includes(
-        "wind"
-      )
+      lowerWeather.includes("wind")
     ) {
+
+      weatherScore = 7;
 
       weatherText =
         "Wind conditions should be considered, especially on exposed sections of the trail.";
@@ -344,21 +392,43 @@ export default async function handler(req, res) {
 
 
     /* =========================
-       SOURCE
+       DATA SOURCE
     ========================= */
+
+    let sourceScore = 5;
 
     let sourceText = "";
 
 
     if (
-      trail.source ===
-      "OpenStreetMap"
+      trail.source === "OpenStreetMap"
     ) {
 
       sourceText =
         "The trail information is based on real OpenStreetMap data.";
 
     }
+
+
+    /* =========================
+       FINAL MATCH SCORE
+    ========================= */
+
+    let matchScore =
+      experienceScore +
+      distanceScore +
+      weatherScore +
+      sourceScore;
+
+
+    matchScore =
+      Math.min(
+        98,
+        Math.max(
+          55,
+          Math.round(matchScore)
+        )
+      );
 
 
     /* =========================
@@ -375,8 +445,9 @@ export default async function handler(req, res) {
 
     return res.status(200).json({
 
-      recommendation:
-        recommendation
+      recommendation,
+
+      matchScore
 
     });
 
@@ -384,10 +455,6 @@ export default async function handler(req, res) {
 
 
   catch (error) {
-
-    /* =========================
-       ERROR HANDLING
-    ========================= */
 
     console.error(
       "Recommendation Error:",
