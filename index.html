@@ -57,7 +57,7 @@
     }
 
     .container {
-      max-width: 900px;
+      max-width: 1050px;
       margin: 20px auto 80px;
       padding: 0 20px;
     }
@@ -66,7 +66,7 @@
       background: white;
       padding: 30px;
       border-radius: 18px;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
     }
 
     .card h2 {
@@ -153,7 +153,7 @@
     }
 
     .trail-name {
-      font-size: 24px;
+      font-size: 26px;
       font-weight: bold;
       margin-bottom: 8px;
     }
@@ -201,12 +201,81 @@
       margin-bottom: 6px;
     }
 
+    .why-box {
+      margin-top: 20px;
+      padding: 18px;
+      background: #f8faf8;
+      border-radius: 10px;
+    }
+
+    .why-title {
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .why-list {
+      padding-left: 20px;
+      color: #667085;
+    }
+
+    .why-list li {
+      margin-bottom: 6px;
+    }
+
     #map {
       width: 100%;
-      height: 420px;
+      height: 440px;
       margin-top: 25px;
       border-radius: 12px;
       overflow: hidden;
+    }
+
+    .results-title {
+      margin-top: 30px;
+      margin-bottom: 15px;
+      font-size: 21px;
+      font-weight: bold;
+    }
+
+    .trail-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .trail-option {
+      background: white;
+      border-radius: 12px;
+      padding: 17px;
+      cursor: pointer;
+      border: 1px solid #e5e7eb;
+      transition: 0.2s;
+    }
+
+    .trail-option:hover {
+      border-color: #98a2b3;
+      transform: translateY(-1px);
+    }
+
+    .trail-option-name {
+      font-weight: bold;
+      font-size: 17px;
+    }
+
+    .trail-option-info {
+      margin-top: 5px;
+      color: #667085;
+      font-size: 14px;
+    }
+
+    .trail-option-score {
+      margin-top: 8px;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .loading {
+      color: #667085;
+      margin-top: 15px;
     }
 
     footer {
@@ -243,12 +312,14 @@
 </header>
 
 <section class="hero">
+
   <h1>Plan Your Next Adventure</h1>
 
   <p>
     AI-powered outdoor trip planning that helps you find
-    trails matched to your experience and preferences.
+    trails matched to your experience, preferences, and current conditions.
   </p>
+
 </section>
 
 <div class="container">
@@ -261,7 +332,9 @@
       Tell TrailMind what kind of adventure you're looking for.
     </p>
 
-    <label for="location">Location</label>
+    <label for="location">
+      Location
+    </label>
 
     <input
       id="location"
@@ -269,7 +342,9 @@
       placeholder="e.g. Fremont, California"
     >
 
-    <label for="activity">Activity</label>
+    <label for="activity">
+      Activity
+    </label>
 
     <select id="activity">
       <option>Hiking</option>
@@ -277,7 +352,9 @@
       <option>Cycling</option>
     </select>
 
-    <label for="experience">Experience Level</label>
+    <label for="experience">
+      Experience Level
+    </label>
 
     <select id="experience">
       <option>Beginner</option>
@@ -285,7 +362,9 @@
       <option>Advanced</option>
     </select>
 
-    <label for="distance">Preferred Distance</label>
+    <label for="distance">
+      Preferred Distance
+    </label>
 
     <select id="distance">
       <option>Short (under 5 miles)</option>
@@ -293,51 +372,95 @@
       <option>Long (10+ miles)</option>
     </select>
 
-    <button id="searchButton" onclick="findTrail()">
-      ✨ Find My Trail
+    <button
+      id="searchButton"
+      onclick="findTrail()"
+    >
+      Find My Trail
     </button>
+
 
     <div id="result">
 
       <h2>Recommended Trail</h2>
 
-      <div id="matchScore" class="match">
+      <div
+        id="matchScore"
+        class="match"
+      >
         90% Match
       </div>
 
+
       <div class="trail">
 
-        <div id="trailName" class="trail-name">
+        <div
+          id="trailName"
+          class="trail-name"
+        >
           Searching...
         </div>
 
         <p id="trailLocation">
-          📍 Searching location...
+          Searching location...
         </p>
+
 
         <div class="stats">
 
           <div class="stat">
-            <strong id="trailDistance">--</strong>
-            <span>Distance</span>
+
+            <strong id="trailDistance">
+              --
+            </strong>
+
+            <span>
+              Distance
+            </span>
+
           </div>
 
-          <div class="stat">
-            <strong id="trailDifficulty">--</strong>
-            <span>Difficulty</span>
-          </div>
 
           <div class="stat">
-            <strong id="trailElevation">--</strong>
-            <span>Elevation</span>
+
+            <strong id="trailDifficulty">
+              --
+            </strong>
+
+            <span>
+              Difficulty
+            </span>
+
+          </div>
+
+
+          <div class="stat">
+
+            <strong id="trailElevation">
+              --
+            </strong>
+
+            <span>
+              Elevation
+            </span>
+
           </div>
 
         </div>
 
+
+        <p
+          id="conditions"
+          class="loading"
+        >
+          Loading weather...
+        </p>
+
+
         <div class="ai-box">
 
           <div class="ai-title">
-            🤖 AI Recommendation
+            AI Recommendation
           </div>
 
           <p id="aiRecommendation">
@@ -346,19 +469,43 @@
 
         </div>
 
-        <p id="conditions">
-          🌤️ Loading weather...
-        </p>
+
+        <div class="why-box">
+
+          <div class="why-title">
+            Why this trail?
+          </div>
+
+          <ul
+            id="whyList"
+            class="why-list"
+          >
+          </ul>
+
+        </div>
 
       </div>
 
+
       <div id="map"></div>
+
+
+      <div class="results-title">
+        Other Trail Options
+      </div>
+
+      <div
+        id="trailList"
+        class="trail-list"
+      >
+      </div>
 
     </div>
 
   </div>
 
 </div>
+
 
 <footer>
   TrailMind · AI Outdoor Trip Planner
@@ -374,103 +521,155 @@
    MAP
 ===================================================== */
 
-let map = L.map("map").setView(
-  [37.5126, -121.8800],
-  11
-);
+let map =
+  L.map("map").setView(
+    [37.5126, -121.8800],
+    11
+  );
+
 
 L.tileLayer(
   "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
   {
-    attribution: "&copy; OpenStreetMap contributors"
+    attribution:
+      "&copy; OpenStreetMap contributors"
   }
 ).addTo(map);
 
+
 let trailMarker = null;
+
+let trailLine = null;
+
+let currentTrails = [];
 
 
 /* =====================================================
    DISTANCE CALCULATION
 ===================================================== */
 
-function calculateDistance(lat1, lon1, lat2, lon2) {
+function calculateDistance(
+  lat1,
+  lon1,
+  lat2,
+  lon2
+) {
 
   const R = 3958.8;
 
   const dLat =
-    (lat2 - lat1) * Math.PI / 180;
+    (lat2 - lat1) *
+    Math.PI / 180;
 
   const dLon =
-    (lon2 - lon1) * Math.PI / 180;
+    (lon2 - lon1) *
+    Math.PI / 180;
 
   const a =
     Math.sin(dLat / 2) *
     Math.sin(dLat / 2) +
-    Math.cos(lat1 * Math.PI / 180) *
-    Math.cos(lat2 * Math.PI / 180) *
+
+    Math.cos(
+      lat1 * Math.PI / 180
+    ) *
+
+    Math.cos(
+      lat2 * Math.PI / 180
+    ) *
+
     Math.sin(dLon / 2) *
     Math.sin(dLon / 2);
 
   const c =
-    2 * Math.atan2(
+    2 *
+    Math.atan2(
       Math.sqrt(a),
       Math.sqrt(1 - a)
     );
 
   return R * c;
+
 }
 
 
 /* =====================================================
-   TRAIL LENGTH FROM OSM GEOMETRY
+   TRAIL LENGTH
 ===================================================== */
 
-function calculateTrailLength(geometry) {
+function calculateTrailLength(
+  geometry
+) {
 
-  if (!geometry || geometry.length < 2) {
+  if (
+    !geometry ||
+    geometry.length < 2
+  ) {
+
     return null;
+
   }
+
 
   let total = 0;
 
-  for (let i = 1; i < geometry.length; i++) {
 
-    total += calculateDistance(
-      geometry[i - 1].lat,
-      geometry[i - 1].lon,
-      geometry[i].lat,
-      geometry[i].lon
-    );
+  for (
+    let i = 1;
+    i < geometry.length;
+    i++
+  ) {
+
+    total +=
+      calculateDistance(
+        geometry[i - 1].lat,
+        geometry[i - 1].lon,
+        geometry[i].lat,
+        geometry[i].lon
+      );
 
   }
+
 
   return total;
+
 }
 
 
 /* =====================================================
-   DIFFICULTY ESTIMATION
+   DIFFICULTY
 ===================================================== */
 
-function estimateDifficulty(distance) {
+function estimateDifficulty(
+  distance
+) {
 
   if (distance < 3) {
+
     return "Easy";
+
   }
+
 
   if (distance < 8) {
+
     return "Moderate";
+
   }
 
+
   return "Hard";
+
 }
 
 
 /* =====================================================
-   GET REAL TRAILS FROM OPENSTREETMAP
+   GET REAL TRAILS
 ===================================================== */
 
-async function getRealTrails(lat, lon) {
+async function getRealTrails(
+  lat,
+  lon
+) {
 
   const query = `
     [out:json][timeout:30];
@@ -492,17 +691,28 @@ async function getRealTrails(lat, lon) {
     out center geom;
   `;
 
-  const response = await fetch(
-    "https://overpass-api.de/api/interpreter",
-    {
-      method: "POST",
-      body: "data=" + encodeURIComponent(query)
-    }
-  );
+
+  const response =
+    await fetch(
+      "https://overpass-api.de/api/interpreter",
+      {
+        method: "POST",
+
+        body:
+          "data=" +
+          encodeURIComponent(query)
+      }
+    );
+
 
   if (!response.ok) {
-    throw new Error("Trail data request failed");
+
+    throw new Error(
+      "Trail data request failed"
+    );
+
   }
+
 
   const data =
     await response.json();
@@ -522,92 +732,148 @@ async function getRealTrails(lat, lon) {
   ];
 
 
-  const trails = data.elements
-    .filter(item => {
+  const trails =
+    data.elements
 
-      if (!item.tags || !item.tags.name) {
-        return false;
-      }
+      .filter(
+        item => {
 
-      const name =
-        item.tags.name.toLowerCase();
+          if (
+            !item.tags ||
+            !item.tags.name
+          ) {
 
-      const looksLikeRoad =
-        excludedNames.some(
-          word => name.includes(word)
-        );
+            return false;
 
-      return !looksLikeRoad;
+          }
 
-    })
-    .map(item => {
 
-      let trailLat;
-      let trailLon;
+          const name =
+            item.tags.name.toLowerCase();
 
-      if (
-        item.center &&
-        item.center.lat &&
-        item.center.lon
-      ) {
 
-        trailLat = item.center.lat;
-        trailLon = item.center.lon;
+          const looksLikeRoad =
+            excludedNames.some(
+              word =>
+                name.includes(word)
+            );
 
-      } else if (
-        item.geometry &&
-        item.geometry.length > 0
-      ) {
 
-        const middle =
-          item.geometry[
-            Math.floor(
-              item.geometry.length / 2
-            )
-          ];
+          return !looksLikeRoad;
 
-        trailLat = middle.lat;
-        trailLon = middle.lon;
+        }
+      )
 
-      }
 
-      const length =
-        calculateTrailLength(
-          item.geometry
-        );
+      .map(
+        item => {
 
-      return {
+          let trailLat;
 
-        name: item.tags.name,
+          let trailLon;
 
-        location: "Near your search",
 
-        distance:
-          length
-            ? Number(length.toFixed(1))
-            : 1,
+          if (
+            item.center &&
+            item.center.lat &&
+            item.center.lon
+          ) {
 
-        difficulty:
-          estimateDifficulty(
-            length || 1
-          ),
+            trailLat =
+              item.center.lat;
 
-        elevation:
-          "Not available",
+            trailLon =
+              item.center.lon;
 
-        lat: trailLat,
-        lon: trailLon,
+          }
 
-        source: "OpenStreetMap"
+          else if (
+            item.geometry &&
+            item.geometry.length > 0
+          ) {
 
-      };
+            const middle =
+              item.geometry[
+                Math.floor(
+                  item.geometry.length / 2
+                )
+              ];
 
-    })
-    .filter(
-      trail =>
-        trail.lat &&
-        trail.lon
-    );
+
+            trailLat =
+              middle.lat;
+
+            trailLon =
+              middle.lon;
+
+          }
+
+
+          const length =
+            calculateTrailLength(
+              item.geometry
+            );
+
+
+          let elevation =
+            "Not available";
+
+
+          if (
+            item.tags.ele
+          ) {
+
+            elevation =
+              item.tags.ele + " m";
+
+          }
+
+
+          return {
+
+            name:
+              item.tags.name,
+
+            location:
+              "Near your search",
+
+            distance:
+              length
+                ? Number(
+                    length.toFixed(1)
+                  )
+                : 1,
+
+            difficulty:
+              estimateDifficulty(
+                length || 1
+              ),
+
+            elevation:
+              elevation,
+
+            lat:
+              trailLat,
+
+            lon:
+              trailLon,
+
+            geometry:
+              item.geometry || [],
+
+            source:
+              "OpenStreetMap"
+
+          };
+
+        }
+      )
+
+      .filter(
+        trail =>
+          trail.lat &&
+          trail.lon
+      );
 
 
   return trails;
@@ -622,43 +888,114 @@ async function getRealTrails(lat, lon) {
 const fallbackTrails = [
 
   {
-    name: "Rancho San Antonio",
-    location: "Cupertino, California",
-    distance: 3.4,
-    difficulty: "Easy",
-    elevation: "650 ft",
-    lat: 37.3197,
-    lon: -122.0753
+    name:
+      "Rancho San Antonio",
+
+    location:
+      "Cupertino, California",
+
+    distance:
+      3.4,
+
+    difficulty:
+      "Easy",
+
+    elevation:
+      "650 ft",
+
+    lat:
+      37.3197,
+
+    lon:
+      -122.0753,
+
+    geometry:
+      []
+
   },
 
-  {
-    name: "Mission Peak",
-    location: "Fremont, California",
-    distance: 5.8,
-    difficulty: "Moderate",
-    elevation: "2,100 ft",
-    lat: 37.5126,
-    lon: -121.8800
-  },
 
   {
-    name: "Lake Chabot Loop",
-    location: "Castro Valley, California",
-    distance: 7.5,
-    difficulty: "Moderate",
-    elevation: "1,200 ft",
-    lat: 37.7300,
-    lon: -122.0580
+    name:
+      "Mission Peak",
+
+    location:
+      "Fremont, California",
+
+    distance:
+      5.8,
+
+    difficulty:
+      "Moderate",
+
+    elevation:
+      "2,100 ft",
+
+    lat:
+      37.5126,
+
+    lon:
+      -121.8800,
+
+    geometry:
+      []
+
   },
 
+
   {
-    name: "Mount Diablo Summit",
-    location: "Mount Diablo, California",
-    distance: 13.0,
-    difficulty: "Hard",
-    elevation: "3,500 ft",
-    lat: 37.8816,
-    lon: -121.9142
+    name:
+      "Lake Chabot Loop",
+
+    location:
+      "Castro Valley, California",
+
+    distance:
+      7.5,
+
+    difficulty:
+      "Moderate",
+
+    elevation:
+      "1,200 ft",
+
+    lat:
+      37.7300,
+
+    lon:
+      -122.0580,
+
+    geometry:
+      []
+
+  },
+
+
+  {
+    name:
+      "Mount Diablo Summit",
+
+    location:
+      "Mount Diablo, California",
+
+    distance:
+      13.0,
+
+    difficulty:
+      "Hard",
+
+    elevation:
+      "3,500 ft",
+
+    lat:
+      37.8816,
+
+    lon:
+      -121.9142,
+
+    geometry:
+      []
+
   }
 
 ];
@@ -728,19 +1065,32 @@ function scoreTrail(
   /* DISTANCE */
 
   if (
-    distancePreference.includes("Short")
+    distancePreference.includes(
+      "Short"
+    )
   ) {
 
-    if (trail.distance < 5) {
+    if (
+      trail.distance < 5
+    ) {
+
       score += 18;
-    } else {
+
+    }
+
+    else {
+
       score -= 10;
+
     }
 
   }
 
+
   else if (
-    distancePreference.includes("Medium")
+    distancePreference.includes(
+      "Medium"
+    )
   ) {
 
     if (
@@ -750,7 +1100,9 @@ function scoreTrail(
 
       score += 18;
 
-    } else {
+    }
+
+    else {
 
       score -= 5;
 
@@ -758,14 +1110,25 @@ function scoreTrail(
 
   }
 
+
   else if (
-    distancePreference.includes("Long")
+    distancePreference.includes(
+      "Long"
+    )
   ) {
 
-    if (trail.distance > 10) {
+    if (
+      trail.distance > 10
+    ) {
+
       score += 18;
-    } else {
+
+    }
+
+    else {
+
       score -= 8;
+
     }
 
   }
@@ -783,45 +1146,38 @@ function scoreTrail(
 
 
 /* =====================================================
-   FIND BEST TRAIL
+   RANK TRAILS
 ===================================================== */
 
-function recommendTrail(
+function rankTrails(
   trails,
   experience,
   distancePreference
 ) {
 
-  if (!trails || trails.length === 0) {
-    return fallbackTrails[1];
-  }
+  return trails
+    .map(
+      trail => {
 
+        return {
 
-  const scoredTrails =
-    trails.map(trail => {
+          ...trail,
 
-      return {
-        ...trail,
+          score:
+            scoreTrail(
+              trail,
+              experience,
+              distancePreference
+            )
 
-        score:
-          scoreTrail(
-            trail,
-            experience,
-            distancePreference
-          )
+        };
 
-      };
-
-    });
-
-
-  scoredTrails.sort(
-    (a, b) =>
-      b.score - a.score
-  );
-
-
-  return scoredTrails[0];
+      }
+    )
+    .sort(
+      (a, b) =>
+        b.score - a.score
+    );
 
 }
 
@@ -830,7 +1186,9 @@ function recommendTrail(
    WEATHER DESCRIPTION
 ===================================================== */
 
-function getWeatherDescription(code) {
+function getWeatherDescription(
+  code
+) {
 
   if (code === 0) {
 
@@ -840,6 +1198,7 @@ function getWeatherDescription(code) {
     };
 
   }
+
 
   if (
     code === 1 ||
@@ -853,6 +1212,7 @@ function getWeatherDescription(code) {
 
   }
 
+
   if (code === 3) {
 
     return {
@@ -861,6 +1221,7 @@ function getWeatherDescription(code) {
     };
 
   }
+
 
   if (
     code >= 51 &&
@@ -874,6 +1235,7 @@ function getWeatherDescription(code) {
 
   }
 
+
   if (
     code >= 71 &&
     code <= 77
@@ -886,6 +1248,7 @@ function getWeatherDescription(code) {
 
   }
 
+
   if (
     code >= 80 &&
     code <= 82
@@ -897,6 +1260,7 @@ function getWeatherDescription(code) {
     };
 
   }
+
 
   if (code >= 95) {
 
@@ -917,6 +1281,389 @@ function getWeatherDescription(code) {
 
 
 /* =====================================================
+   DRAW TRAIL
+===================================================== */
+
+function drawTrail(
+  trail
+) {
+
+  if (trailLine) {
+
+    map.removeLayer(
+      trailLine
+    );
+
+  }
+
+
+  if (
+    trail.geometry &&
+    trail.geometry.length > 1
+  ) {
+
+    const coordinates =
+      trail.geometry.map(
+        point => [
+          point.lat,
+          point.lon
+        ]
+      );
+
+
+    trailLine =
+      L.polyline(
+        coordinates,
+        {
+          weight: 5,
+          opacity: 0.85
+        }
+      ).addTo(map);
+
+
+    map.fitBounds(
+      trailLine.getBounds(),
+      {
+        padding: [
+          30,
+          30
+        ]
+      }
+    );
+
+  }
+
+  else {
+
+    map.setView(
+      [
+        trail.lat,
+        trail.lon
+      ],
+      13
+    );
+
+  }
+
+
+  if (trailMarker) {
+
+    map.removeLayer(
+      trailMarker
+    );
+
+  }
+
+
+  trailMarker =
+    L.marker(
+      [
+        trail.lat,
+        trail.lon
+      ]
+    )
+    .addTo(map)
+    .bindPopup(
+      `<b>${trail.name}</b><br>${trail.location}`
+    )
+    .openPopup();
+
+}
+
+
+/* =====================================================
+   DISPLAY TRAIL
+===================================================== */
+
+function displayTrail(
+  trail,
+  experience,
+  distancePreference
+) {
+
+  document.getElementById(
+    "trailName"
+  ).textContent =
+    trail.name;
+
+
+  document.getElementById(
+    "trailLocation"
+  ).textContent =
+    "📍 " +
+    trail.location;
+
+
+  document.getElementById(
+    "trailDistance"
+  ).textContent =
+    trail.distance +
+    " mi";
+
+
+  document.getElementById(
+    "trailDifficulty"
+  ).textContent =
+    trail.difficulty;
+
+
+  document.getElementById(
+    "trailElevation"
+  ).textContent =
+    trail.elevation;
+
+
+  document.getElementById(
+    "matchScore"
+  ).textContent =
+    trail.score +
+    "% Match";
+
+
+  drawTrail(
+    trail
+  );
+
+
+  updateWhyThisTrail(
+    trail,
+    experience,
+    distancePreference
+  );
+
+}
+
+
+/* =====================================================
+   WHY THIS TRAIL
+===================================================== */
+
+function updateWhyThisTrail(
+  trail,
+  experience,
+  distancePreference
+) {
+
+  const list =
+    document.getElementById(
+      "whyList"
+    );
+
+
+  list.innerHTML = "";
+
+
+  const reasons = [];
+
+
+  if (
+    experience === "Beginner" &&
+    trail.difficulty === "Easy"
+  ) {
+
+    reasons.push(
+      "The difficulty matches your beginner experience level."
+    );
+
+  }
+
+  else if (
+    experience === "Intermediate" &&
+    trail.difficulty === "Moderate"
+  ) {
+
+    reasons.push(
+      "The difficulty matches your intermediate experience level."
+    );
+
+  }
+
+  else if (
+    experience === "Advanced" &&
+    trail.difficulty === "Hard"
+  ) {
+
+    reasons.push(
+      "The difficulty matches your advanced experience level."
+    );
+
+  }
+
+
+  if (
+    distancePreference.includes(
+      "Short"
+    ) &&
+    trail.distance < 5
+  ) {
+
+    reasons.push(
+      "The distance matches your preference for a shorter outing."
+    );
+
+  }
+
+  else if (
+    distancePreference.includes(
+      "Medium"
+    ) &&
+    trail.distance >= 5 &&
+    trail.distance <= 10
+  ) {
+
+    reasons.push(
+      "The distance fits your preferred medium-length hike."
+    );
+
+  }
+
+  else if (
+    distancePreference.includes(
+      "Long"
+    ) &&
+    trail.distance > 10
+  ) {
+
+    reasons.push(
+      "The longer distance fits your preference for an extended adventure."
+    );
+
+  }
+
+
+  if (
+    trail.source ===
+    "OpenStreetMap"
+  ) {
+
+    reasons.push(
+      "Trail information comes from real OpenStreetMap data."
+    );
+
+  }
+
+
+  if (
+    reasons.length === 0
+  ) {
+
+    reasons.push(
+      "This trail received the highest overall match score from the available options."
+    );
+
+  }
+
+
+  reasons.forEach(
+    reason => {
+
+      const li =
+        document.createElement(
+          "li"
+        );
+
+      li.textContent =
+        reason;
+
+      list.appendChild(
+        li
+      );
+
+    }
+  );
+
+}
+
+
+/* =====================================================
+   DISPLAY OTHER TRAILS
+===================================================== */
+
+function displayTrailOptions(
+  trails,
+  selectedTrail
+) {
+
+  const container =
+    document.getElementById(
+      "trailList"
+    );
+
+
+  container.innerHTML = "";
+
+
+  trails
+    .slice(0, 5)
+    .forEach(
+      trail => {
+
+        const option =
+          document.createElement(
+            "div"
+          );
+
+
+        option.className =
+          "trail-option";
+
+
+        option.innerHTML = `
+
+          <div class="trail-option-name">
+            ${trail.name}
+          </div>
+
+          <div class="trail-option-info">
+            ${trail.distance} mi ·
+            ${trail.difficulty}
+          </div>
+
+          <div class="trail-option-score">
+            ${trail.score}% Match
+          </div>
+
+        `;
+
+
+        option.onclick =
+          () => {
+
+            displayTrail(
+              trail,
+              document.getElementById(
+                "experience"
+              ).value,
+              document.getElementById(
+                "distance"
+              ).value
+            );
+
+          };
+
+
+        if (
+          trail.name ===
+          selectedTrail.name
+        ) {
+
+          option.style.border =
+            "2px solid #1f2933";
+
+        }
+
+
+        container.appendChild(
+          option
+        );
+
+      }
+    );
+
+}
+
+
+/* =====================================================
    MAIN FUNCTION
 ===================================================== */
 
@@ -924,31 +1671,46 @@ async function findTrail() {
 
   const location =
     document
-      .getElementById("location")
+      .getElementById(
+        "location"
+      )
       .value
       .trim();
 
+
   const activity =
     document
-      .getElementById("activity")
+      .getElementById(
+        "activity"
+      )
       .value;
+
 
   const experience =
     document
-      .getElementById("experience")
+      .getElementById(
+        "experience"
+      )
       .value;
+
 
   const distancePreference =
     document
-      .getElementById("distance")
+      .getElementById(
+        "distance"
+      )
       .value;
 
+
   const button =
-    document
-      .getElementById("searchButton");
+    document.getElementById(
+      "searchButton"
+    );
 
 
-  if (location === "") {
+  if (
+    location === ""
+  ) {
 
     alert(
       "Please enter a location."
@@ -959,10 +1721,12 @@ async function findTrail() {
   }
 
 
-  button.disabled = true;
+  button.disabled =
+    true;
+
 
   button.textContent =
-    "🔎 Finding your trail...";
+    "Finding your trail...";
 
 
   try {
@@ -976,9 +1740,22 @@ async function findTrail() {
 
         "https://nominatim.openstreetmap.org/search" +
         "?format=json&q=" +
-        encodeURIComponent(location)
+        encodeURIComponent(
+          location
+        )
 
       );
+
+
+    if (
+      !locationResponse.ok
+    ) {
+
+      throw new Error(
+        "Location search failed"
+      );
+
+    }
 
 
     const locationData =
@@ -1003,6 +1780,7 @@ async function findTrail() {
         locationData[0].lat
       );
 
+
     const lon =
       parseFloat(
         locationData[0].lon
@@ -1024,7 +1802,9 @@ async function findTrail() {
           lon
         );
 
-    } catch (error) {
+    }
+
+    catch (error) {
 
       console.warn(
         "Using fallback trail data.",
@@ -1035,217 +1815,217 @@ async function findTrail() {
 
 
     /* =========================
-       SELECT TRAIL
+       FALLBACK
     ========================= */
-
-    let trail;
-
 
     if (
-      trails.length > 0
+      trails.length === 0
     ) {
 
-      trail =
-        recommendTrail(
-          trails,
-          experience,
-          distancePreference
-        );
-
-    } else {
-
-      trail =
-        recommendTrail(
-          fallbackTrails,
-          experience,
-          distancePreference
-        );
+      trails =
+        fallbackTrails;
 
     }
 
 
     /* =========================
-       MAP
+       RANK
     ========================= */
 
-    map.setView(
-      [trail.lat, trail.lon],
-      13
-    );
-
-
-    if (trailMarker) {
-
-      map.removeLayer(
-        trailMarker
-      );
-
-    }
-
-
-    trailMarker =
-      L.marker(
-        [trail.lat, trail.lon]
-      )
-      .addTo(map)
-      .bindPopup(
-        `<b>${trail.name}</b><br>${trail.location}`
-      )
-      .openPopup();
-
-
-    /* =========================
-       TRAIL INFORMATION
-    ========================= */
-
-    document.getElementById(
-      "trailName"
-    ).textContent =
-      trail.name;
-
-
-    document.getElementById(
-      "trailLocation"
-    ).textContent =
-      "📍 " + trail.location;
-
-
-    document.getElementById(
-      "trailDistance"
-    ).textContent =
-      trail.distance +
-      " mi";
-
-
-    document.getElementById(
-      "trailDifficulty"
-    ).textContent =
-      trail.difficulty;
-
-
-    document.getElementById(
-      "trailElevation"
-    ).textContent =
-      trail.elevation;
-
-
-    /* =========================
-       MATCH SCORE
-    ========================= */
-
-    const score =
-      trail.score ||
-      scoreTrail(
-        trail,
+    const rankedTrails =
+      rankTrails(
+        trails,
         experience,
         distancePreference
       );
 
 
-    document.getElementById(
-      "matchScore"
-    ).textContent =
-      score +
-      "% Match";
+    currentTrails =
+      rankedTrails;
+
+
+    const trail =
+      rankedTrails[0];
+
+
+    /* =========================
+       DISPLAY
+    ========================= */
+
+    displayTrail(
+      trail,
+      experience,
+      distancePreference
+    );
+
+
+    displayTrailOptions(
+      rankedTrails,
+      trail
+    );
 
 
     /* =========================
        WEATHER
     ========================= */
 
-    const weatherResponse =
-      await fetch(
-
-        `https://api.open-meteo.com/v1/forecast?latitude=${trail.lat}&longitude=${trail.lon}&current=temperature_2m,weather_code,wind_speed_10m&temperature_unit=fahrenheit&wind_speed_unit=mph`
-
-      );
-
-
-    const weatherData =
-      await weatherResponse.json();
-
-
-    const temperature =
-      Math.round(
-        weatherData.current
-          .temperature_2m
-      );
-
-
-    const wind =
-      Math.round(
-        weatherData.current
-          .wind_speed_10m
-      );
-
-
-    const weatherInfo =
-      getWeatherDescription(
-        weatherData.current
-          .weather_code
-      );
-
-    const aiWeatherText =
-      `${temperature}°F, ${weatherInfo.text}, Wind ${wind} mph`;
-
-
-    document.getElementById(
-      "conditions"
-    ).textContent =
-      `${weatherInfo.icon} ${temperature}°F · ${weatherInfo.text} · Wind ${wind} mph`;
-    
-
-    /* =========================
-       AI RECOMMENDATION
-    ========================= */
-    
     try {
-    
-      const aiResponse = await fetch("https://trail-mind-three.vercel.app/api/recommend", {
-        method: "POST",
-    
-        headers: {
-          "Content-Type": "application/json"
-        },
-    
-        body: JSON.stringify({
-          trail: trail,
-          experience: experience,
-          distancePreference: distancePreference,
-          weather: aiWeatherText
-        })
-      });
-    
-      const aiData = await aiResponse.json();
-    
-      if (aiResponse.ok) {
-    
-        document.getElementById(
-          "aiRecommendation"
-        ).textContent =
-          aiData.recommendation;
-    
-      } else {
-    
-        document.getElementById(
-          "aiRecommendation"
-        ).textContent =
-          "AI recommendation is temporarily unavailable.";
-    
+
+      const weatherResponse =
+        await fetch(
+
+          `https://api.open-meteo.com/v1/forecast?latitude=${trail.lat}&longitude=${trail.lon}&current=temperature_2m,weather_code,wind_speed_10m&temperature_unit=fahrenheit&wind_speed_unit=mph`
+
+        );
+
+
+      if (
+        !weatherResponse.ok
+      ) {
+
+        throw new Error(
+          "Weather request failed"
+        );
+
       }
-    
-    } catch (error) {
-    
+
+
+      const weatherData =
+        await weatherResponse.json();
+
+
+      const temperature =
+        Math.round(
+          weatherData
+            .current
+            .temperature_2m
+        );
+
+
+      const wind =
+        Math.round(
+          weatherData
+            .current
+            .wind_speed_10m
+        );
+
+
+      const weatherInfo =
+        getWeatherDescription(
+          weatherData
+            .current
+            .weather_code
+        );
+
+
+      const aiWeatherText =
+        `${temperature}°F, ${weatherInfo.text}, Wind ${wind} mph`;
+
+
+      document.getElementById(
+        "conditions"
+      ).textContent =
+        `${weatherInfo.icon} ${temperature}°F · ${weatherInfo.text} · Wind ${wind} mph`;
+
+
+      /* =========================
+         RECOMMENDATION API
+      ========================= */
+
+      try {
+
+        const aiResponse =
+          await fetch(
+
+            "https://trail-mind-three.vercel.app/api/recommend",
+
+            {
+              method:
+                "POST",
+
+              headers: {
+                "Content-Type":
+                  "application/json"
+              },
+
+              body:
+                JSON.stringify({
+
+                  trail:
+                    trail,
+
+                  experience:
+                    experience,
+
+                  distancePreference:
+                    distancePreference,
+
+                  weather:
+                    aiWeatherText
+
+                })
+
+            }
+
+          );
+
+
+        const aiData =
+          await aiResponse.json();
+
+
+        if (
+          aiResponse.ok
+        ) {
+
+          document.getElementById(
+            "aiRecommendation"
+          ).textContent =
+            aiData.recommendation;
+
+        }
+
+        else {
+
+          document.getElementById(
+            "aiRecommendation"
+          ).textContent =
+            "Recommendation is temporarily unavailable.";
+
+        }
+
+      }
+
+      catch (error) {
+
+        console.error(
+          "Recommendation error:",
+          error
+        );
+
+
+        document.getElementById(
+          "aiRecommendation"
+        ).textContent =
+          "Recommendation is temporarily unavailable.";
+
+      }
+
+    }
+
+    catch (error) {
+
       console.error(
-        "AI recommendation error:",
+        "Weather error:",
         error
       );
-    
+
+
       document.getElementById(
-        "aiRecommendation"
+        "conditions"
       ).textContent =
-        "AI recommendation is temporarily unavailable.";
-    
+        "Weather information is temporarily unavailable.";
+
     }
 
 
@@ -1259,23 +2039,39 @@ async function findTrail() {
       "block";
 
 
-    map.invalidateSize();
+    setTimeout(
+      () => {
+
+        map.invalidateSize();
+
+      },
+      100
+    );
 
 
-  } catch (error) {
+  }
 
-    console.error(error);
+  catch (error) {
+
+    console.error(
+      error
+    );
+
 
     alert(
       "Something went wrong. Please try again."
     );
 
-  } finally {
+  }
 
-    button.disabled = false;
+  finally {
+
+    button.disabled =
+      false;
+
 
     button.textContent =
-      "✨ Find My Trail";
+      "Find My Trail";
 
   }
 
