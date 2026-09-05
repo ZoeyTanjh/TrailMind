@@ -123,22 +123,17 @@ Be natural and helpful.
 
       const error =
         await response.text();
-
+    
       console.error(
         "OpenAI API Error:",
         error
       );
-
-
-      return res.status(500).json({
-
-        error:
-          "OpenAI API request failed"
-
+    
+      return res.status(response.status).json({
+        error: error
       });
-
+    
     }
-
 
     /* =========================
         GET OPENAI RESPONSE
