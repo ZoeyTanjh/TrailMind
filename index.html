@@ -1129,7 +1129,7 @@
         <div>
 
           <h3>
-            AI Recommendation
+            TrailMind Recommendation
           </h3>
 
           <div
@@ -1220,579 +1220,838 @@
 
   <script>
 
+/* =========================
+   GLOBAL VARIABLES
+========================= */
 
-    /* =========================
-       GLOBAL VARIABLES
-    ========================= */
+let map = null;
 
-    let map = null;
+let currentTrailLayer = null;
 
-    let currentTrailLayer = null;
+let currentTrails = [];
 
-    let currentTrails = [];
+let selectedTrail = null;
 
-    let selectedTrail = null;
+let currentWeatherText = "";
 
 
-    /* =========================
-       DOM ELEMENTS
-    ========================= */
+/* =========================
+   DOM ELEMENTS
+========================= */
 
-    const form =
-      document.getElementById(
-        "trailForm"
+const form =
+  document.getElementById("trailForm");
+
+const locationInput =
+  document.getElementById("location");
+
+const activityInput =
+  document.getElementById("activity");
+
+const experienceInput =
+  document.getElementById("experience");
+
+const distanceInput =
+  document.getElementById("distancePreference");
+
+const findButton =
+  document.getElementById("findButton");
+
+const statusBox =
+  document.getElementById("status");
+
+const errorBox =
+  document.getElementById("error");
+
+const results =
+  document.getElementById("results");
+
+const trailName =
+  document.getElementById("trailName");
+
+const trailLocation =
+  document.getElementById("trailLocation");
+
+const trailDistance =
+  document.getElementById("trailDistance");
+
+const trailDifficulty =
+  document.getElementById("trailDifficulty");
+
+const trailElevation =
+  document.getElementById("trailElevation");
+
+const weatherText =
+  document.getElementById("weatherText");
+
+const recommendation =
+  document.getElementById("recommendation");
+
+const matchScore =
+  document.getElementById("matchScore");
+
+const whyList =
+  document.getElementById("whyList");
+
+const trailList =
+  document.getElementById("trailList");
+
+
+/* =========================
+   STATUS HELPERS
+========================= */
+
+function showStatus(message) {
+
+  statusBox.textContent =
+    message;
+
+  statusBox.style.display =
+    "block";
+
+}
+
+
+function hideStatus() {
+
+  statusBox.style.display =
+    "none";
+
+}
+
+
+function showError(message) {
+
+  errorBox.textContent =
+    message;
+
+  errorBox.style.display =
+    "block";
+
+}
+
+
+function hideError() {
+
+  errorBox.style.display =
+    "none";
+
+}
+
+
+/* =========================
+   INITIALIZE MAP
+========================= */
+
+function initializeMap(
+  latitude,
+  longitude
+) {
+
+  if (!map) {
+
+    map =
+      L.map("map").setView(
+        [
+          latitude,
+          longitude
+        ],
+        13
       );
 
-    const locationInput =
-      document.getElementById(
-        "location"
-      );
 
-    const activityInput =
-      document.getElementById(
-        "activity"
-      );
+    L.tileLayer(
+      "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+      {
+        maxZoom: 19,
 
-    const experienceInput =
-      document.getElementById(
-        "experience"
-      );
-
-    const distanceInput =
-      document.getElementById(
-        "distancePreference"
-      );
-
-    const findButton =
-      document.getElementById(
-        "findButton"
-      );
-
-    const statusBox =
-      document.getElementById(
-        "status"
-      );
-
-    const errorBox =
-      document.getElementById(
-        "error"
-      );
-
-    const results =
-      document.getElementById(
-        "results"
-      );
-
-    const trailName =
-      document.getElementById(
-        "trailName"
-      );
-
-    const trailLocation =
-      document.getElementById(
-        "trailLocation"
-      );
-
-    const trailDistance =
-      document.getElementById(
-        "trailDistance"
-      );
-
-    const trailDifficulty =
-      document.getElementById(
-        "trailDifficulty"
-      );
-
-    const trailElevation =
-      document.getElementById(
-        "trailElevation"
-      );
-
-    const weatherText =
-      document.getElementById(
-        "weatherText"
-      );
-
-    const recommendation =
-      document.getElementById(
-        "recommendation"
-      );
-
-    const matchScore =
-      document.getElementById(
-        "matchScore"
-      );
-
-    const whyList =
-      document.getElementById(
-        "whyList"
-      );
-
-    const trailList =
-      document.getElementById(
-        "trailList"
-      );
-
-
-    /* =========================
-       STATUS HELPERS
-    ========================= */
-
-    function showStatus(message) {
-
-      statusBox.textContent =
-        message;
-
-      statusBox.style.display =
-        "block";
-
-    }
-
-
-    function hideStatus() {
-
-      statusBox.style.display =
-        "none";
-
-    }
-
-
-    function showError(message) {
-
-      errorBox.textContent =
-        message;
-
-      errorBox.style.display =
-        "block";
-
-    }
-
-
-    function hideError() {
-
-      errorBox.style.display =
-        "none";
-
-    }
-
-
-    /* =========================
-       INITIALIZE MAP
-    ========================= */
-
-    function initializeMap(
-      latitude,
-      longitude
-    ) {
-
-      if (!map) {
-
-        map =
-          L.map(
-            "map"
-          ).setView(
-            [
-              latitude,
-              longitude
-            ],
-            13
-          );
-
-
-        L.tileLayer(
-          "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-          {
-            maxZoom: 19,
-
-            attribution:
-              "&copy; OpenStreetMap contributors"
-          }
-        ).addTo(
-          map
-        );
-
+        attribution:
+          "&copy; OpenStreetMap contributors"
       }
+    ).addTo(map);
 
-      else {
+  }
 
-        map.setView(
-          [
-            latitude,
-            longitude
-          ],
-          13
-        );
+  else {
 
-      }
+    map.setView(
+      [
+        latitude,
+        longitude
+      ],
+      13
+    );
 
-    }
+  }
 
-
-    /* =========================
-       CALCULATE GEOMETRY DISTANCE
-    ========================= */
-
-    function calculateTrailLength(
-      geometry
-    ) {
-
-      if (
-        !geometry ||
-        geometry.length < 2
-      ) {
-
-        return 0;
-
-      }
+}
 
 
-      let totalMeters = 0;
+/* =========================
+   CALCULATE GEOMETRY DISTANCE
+========================= */
+
+function calculateTrailLength(
+  geometry
+) {
+
+  if (
+    !geometry ||
+    geometry.length < 2
+  ) {
+
+    return 0;
+
+  }
 
 
-      for (
-        let i = 1;
-        i < geometry.length;
-        i++
-      ) {
-
-        const previous =
-          geometry[i - 1];
-
-        const current =
-          geometry[i];
+  let totalMeters = 0;
 
 
-        const pointA =
-          L.latLng(
-            previous.lat,
-            previous.lon
-          );
+  for (
+    let i = 1;
+    i < geometry.length;
+    i++
+  ) {
+
+    const previous =
+      geometry[i - 1];
+
+    const current =
+      geometry[i];
 
 
-        const pointB =
-          L.latLng(
-            current.lat,
-            current.lon
-          );
+    const pointA =
+      L.latLng(
+        previous.lat,
+        previous.lon
+      );
 
 
-        totalMeters +=
-          pointA.distanceTo(
-            pointB
-          );
+    const pointB =
+      L.latLng(
+        current.lat,
+        current.lon
+      );
 
-      }
 
+    totalMeters +=
+      pointA.distanceTo(
+        pointB
+      );
+
+  }
+
+
+  return (
+    totalMeters / 1609.344
+  );
+
+}
+
+
+/* =========================
+   CALCULATE MULTIPLE SEGMENTS
+========================= */
+
+function calculateSegmentsLength(
+  segments
+) {
+
+  if (
+    !segments ||
+    segments.length === 0
+  ) {
+
+    return 0;
+
+  }
+
+
+  return segments.reduce(
+    (
+      total,
+      segment
+    ) => {
 
       return (
-        totalMeters /
-        1609.344
+        total +
+        calculateTrailLength(
+          segment
+        )
+      );
+
+    },
+    0
+  );
+
+}
+
+
+/* =========================
+   POINT DISTANCE
+========================= */
+
+function pointDistance(
+  a,
+  b
+) {
+
+  if (
+    !a ||
+    !b
+  ) {
+
+    return Infinity;
+
+  }
+
+
+  const pointA =
+    L.latLng(
+      a.lat,
+      a.lon
+    );
+
+
+  const pointB =
+    L.latLng(
+      b.lat,
+      b.lon
+    );
+
+
+  return pointA.distanceTo(
+    pointB
+  );
+
+}
+
+
+/* =========================
+   ROUTE WAY CONNECTION
+========================= */
+
+function isCloseEnough(
+  a,
+  b
+) {
+
+  return (
+    pointDistance(a, b) <= 35
+  );
+
+}
+
+
+/* =========================
+   MERGE ORDERED WAY MEMBERS
+========================= */
+
+function mergeWayGeometries(
+  wayGeometries
+) {
+
+  const segments = [];
+
+  let currentSegment = [];
+
+
+  for (
+    const geometry
+    of wayGeometries
+  ) {
+
+    if (
+      !geometry ||
+      geometry.length < 2
+    ) {
+
+      continue;
+
+    }
+
+
+    const nextGeometry =
+      geometry.map(
+        point => ({
+          lat:
+            Number(point.lat),
+
+          lon:
+            Number(point.lon)
+        })
+      );
+
+
+    if (
+      currentSegment.length === 0
+    ) {
+
+      currentSegment =
+        nextGeometry.slice();
+
+      continue;
+
+    }
+
+
+    const currentEnd =
+      currentSegment[
+        currentSegment.length - 1
+      ];
+
+    const nextStart =
+      nextGeometry[0];
+
+    const nextEnd =
+      nextGeometry[
+        nextGeometry.length - 1
+      ];
+
+
+    if (
+      isCloseEnough(
+        currentEnd,
+        nextStart
+      )
+    ) {
+
+      currentSegment.push(
+        ...nextGeometry.slice(1)
       );
 
     }
 
 
-    /* =========================
-       ESTIMATE DIFFICULTY
-    ========================= */
-
-    function estimateDifficulty(
-      distance
+    else if (
+      isCloseEnough(
+        currentEnd,
+        nextEnd
+      )
     ) {
 
-      if (
-        distance <= 3
-      ) {
-
-        return "Easy";
-
-      }
+      const reversed =
+        nextGeometry
+          .slice()
+          .reverse();
 
 
-      if (
-        distance <= 7
-      ) {
-
-        return "Moderate";
-
-      }
-
-
-      return "Hard";
+      currentSegment.push(
+        ...reversed.slice(1)
+      );
 
     }
 
 
-    /* =========================
-       CALCULATE MATCH SCORE
-    ========================= */
-    
-    function calculateMatchScore(
-      trail,
-      experience,
+    else {
+
+      segments.push(
+        currentSegment
+      );
+
+      currentSegment =
+        nextGeometry.slice();
+
+    }
+
+  }
+
+
+  if (
+    currentSegment.length >= 2
+  ) {
+
+    segments.push(
+      currentSegment
+    );
+
+  }
+
+
+  return segments;
+
+}
+
+
+/* =========================
+   ESTIMATE DIFFICULTY
+========================= */
+
+function estimateDifficulty(
+  distance
+) {
+
+  if (
+    distance <= 3
+  ) {
+
+    return "Easy";
+
+  }
+
+
+  if (
+    distance <= 7
+  ) {
+
+    return "Moderate";
+
+  }
+
+
+  return "Hard";
+
+}
+
+
+/* =========================
+   EXPERIENCE SCORE
+========================= */
+
+function getExperienceScore(
+  difficulty,
+  experience
+) {
+
+  if (
+    experience === "Beginner"
+  ) {
+
+    if (
+      difficulty === "Easy"
+    ) {
+
+      return 25;
+
+    }
+
+    if (
+      difficulty === "Moderate"
+    ) {
+
+      return 15;
+
+    }
+
+    return 7;
+
+  }
+
+
+  if (
+    experience === "Intermediate"
+  ) {
+
+    if (
+      difficulty === "Moderate"
+    ) {
+
+      return 25;
+
+    }
+
+    if (
+      difficulty === "Easy"
+    ) {
+
+      return 17;
+
+    }
+
+    return 12;
+
+  }
+
+
+  if (
+    experience === "Advanced"
+  ) {
+
+    if (
+      difficulty === "Hard"
+    ) {
+
+      return 25;
+
+    }
+
+    if (
+      difficulty === "Moderate"
+    ) {
+
+      return 17;
+
+    }
+
+    return 10;
+
+  }
+
+
+  return 12;
+
+}
+
+
+/* =========================
+   DISTANCE SCORE
+========================= */
+
+function getDistanceScore(
+  distance,
+  preference
+) {
+
+  const value =
+    Number(distance || 0);
+
+
+  if (
+    preference ===
+    "Short (under 5 miles)"
+  ) {
+
+    const difference =
+      Math.abs(
+        3 - value
+      );
+
+
+    return Math.max(
+      0,
+      Math.round(
+        25 -
+        difference * 6
+      )
+    );
+
+  }
+
+
+  if (
+    preference ===
+    "Medium (5-10 miles)"
+  ) {
+
+    const difference =
+      Math.abs(
+        7.5 - value
+      );
+
+
+    return Math.max(
+      0,
+      Math.round(
+        25 -
+        difference * 4
+      )
+    );
+
+  }
+
+
+  if (
+    preference ===
+    "Long (10+ miles)"
+  ) {
+
+    if (
+      value >= 12
+    ) {
+
+      return 25;
+
+    }
+
+
+    if (
+      value >= 10
+    ) {
+
+      return 21;
+
+    }
+
+
+    return Math.max(
+      0,
+      Math.round(
+        15 -
+        (10 - value) * 2
+      )
+    );
+
+  }
+
+
+  return 10;
+
+}
+
+
+/* =========================
+   MATCH SCORE
+========================= */
+
+function calculateMatchScore(
+  trail,
+  experience,
+  distancePreference
+) {
+
+  let score = 40;
+
+
+  score +=
+    getExperienceScore(
+      trail.difficulty,
+      experience
+    );
+
+
+  score +=
+    getDistanceScore(
+      trail.distance,
       distancePreference
-    ) {
-    
-      let score = 45;
-    
-    
-      /* =========================
-         EXPERIENCE MATCH
-      ========================= */
-    
-      if (
-        experience === "Beginner" &&
-        trail.difficulty === "Easy"
-      ) {
-    
-        score += 22;
-    
-      }
-    
-      else if (
-        experience === "Intermediate" &&
-        trail.difficulty === "Moderate"
-      ) {
-    
-        score += 22;
-    
-      }
-    
-      else if (
-        experience === "Advanced" &&
-        trail.difficulty === "Hard"
-      ) {
-    
-        score += 22;
-    
-      }
-    
-      else if (
-        experience === "Intermediate" &&
-        trail.difficulty === "Easy"
-      ) {
-    
-        score += 16;
-    
-      }
-    
-      else if (
-        experience === "Advanced" &&
-        trail.difficulty === "Moderate"
-      ) {
-    
-        score += 16;
-    
-      }
-    
-      else {
-    
-        score += 8;
-    
-      }
-    
-    
-      /* =========================
-         DISTANCE MATCH
-      ========================= */
-    
-      const distance =
-        Number(
-          trail.distance || 0
-        );
-    
-    
-      if (
-        distancePreference ===
-        "Short (under 5 miles)"
-      ) {
-    
-        if (
-          distance >= 2 &&
-          distance < 4
-        ) {
-    
-          score += 20;
-    
-        }
-    
-        else if (
-          distance >= 1 &&
-          distance < 5
-        ) {
-    
-          score += 16;
-    
-        }
-    
-        else if (
-          distance >= 0.5 &&
-          distance < 1
-        ) {
-    
-          score += 10;
-    
-        }
-    
-        else if (
-          distance < 0.5
-        ) {
-    
-          score += 4;
-    
-        }
-    
-        else {
-    
-          score += 0;
-    
-        }
-    
-      }
-    
-    
-      else if (
-        distancePreference ===
-        "Medium (5-10 miles)"
-      ) {
-    
-        if (
-          distance >= 6 &&
-          distance <= 9
-        ) {
-    
-          score += 20;
-    
-        }
-    
-        else if (
-          distance >= 5 &&
-          distance <= 10
-        ) {
-    
-          score += 17;
-    
-        }
-    
-        else {
-    
-          score += 3;
-    
-        }
-    
-      }
-    
-    
-      else if (
-        distancePreference ===
-        "Long (10+ miles)"
-      ) {
-    
-        if (
-          distance >= 12
-        ) {
-    
-          score += 20;
-    
-        }
-    
-        else if (
-          distance >= 10
-        ) {
-    
-          score += 17;
-    
-        }
-    
-        else {
-    
-          score += 3;
-    
-        }
-    
-      }
-    
-    
-      /* =========================
-         TRAIL QUALITY
-      ========================= */
-    
-      if (
-        trail.isRelation
-      ) {
-    
-        score += 8;
-    
-      }
-    
-      else {
-    
-        score += 3;
-    
-      }
-    
-    
-      /* =========================
-         SMALL DETERMINISTIC
-         DIFFERENCE
-      ========================= */
-    
-      const nameValue =
-        String(
-          trail.name || ""
-        )
-          .split("")
-          .reduce(
-            (
-              total,
-              character
-            ) =>
-              total +
-              character.charCodeAt(0),
-            0
-          );
-    
-    
-      score +=
-        nameValue % 5;
-    
-    
-      return Math.min(
-        97,
-        Math.max(
-          55,
-          Math.round(score)
-        )
-      );
-    
-    }
+    );
 
 
-    /* =========================
-       GEOCODE LOCATION
-    ========================= */
+  if (
+    trail.isRelation
+  ) {
 
-    async function geocodeLocation(
-      query
-    ) {
+    score += 5;
 
-      const url =
-        "https://nominatim.openstreetmap.org/search" +
-        "?format=json" +
-        "&limit=1" +
-        "&q=" +
-        encodeURIComponent(
-          query
-        );
+  }
 
+
+  return Math.min(
+    95,
+    Math.max(
+      50,
+      Math.round(score)
+    )
+  );
+
+}
+
+
+/* =========================
+   GEOCODE
+========================= */
+
+async function geocodeLocation(
+  query
+) {
+
+  const url =
+    "https://nominatim.openstreetmap.org/search" +
+    "?format=json" +
+    "&limit=1" +
+    "&q=" +
+    encodeURIComponent(query);
+
+
+  const response =
+    await fetch(
+      url,
+      {
+        headers: {
+          "Accept":
+            "application/json"
+        }
+      }
+    );
+
+
+  if (
+    !response.ok
+  ) {
+
+    throw new Error(
+      "Location search failed."
+    );
+
+  }
+
+
+  const data =
+    await response.json();
+
+
+  if (
+    !data ||
+    data.length === 0
+  ) {
+
+    throw new Error(
+      "Location not found. Try another city or place."
+    );
+
+  }
+
+
+  return {
+
+    latitude:
+      Number(
+        data[0].lat
+      ),
+
+    longitude:
+      Number(
+        data[0].lon
+      ),
+
+    displayName:
+      data[0].display_name
+
+  };
+
+}
+
+
+/* =========================
+   OVERPASS QUERY
+========================= */
+
+async function queryOverpass(
+  query
+) {
+
+  const endpoints = [
+
+    "https://overpass-api.de/api/interpreter",
+
+    "https://overpass.kumi.systems/api/interpreter"
+
+  ];
+
+
+  let lastError = null;
+
+
+  for (
+    const endpoint
+    of endpoints
+  ) {
+
+    try {
 
       const response =
         await fetch(
-          url,
+          endpoint,
           {
+            method:
+              "POST",
+
+            body:
+              query,
+
             headers: {
-              "Accept":
-                "application/json"
+              "Content-Type":
+                "text/plain"
             }
           }
         );
@@ -1803,219 +2062,575 @@
       ) {
 
         throw new Error(
-          "Location search failed."
+          `Overpass request failed: ${response.status}`
         );
 
       }
 
 
-      const data =
-        await response.json();
+      return await response.json();
+
+    }
+
+    catch (
+      error
+    ) {
+
+      lastError =
+        error;
+
+    }
+
+  }
 
 
-      if (
-        !data ||
-        data.length === 0
-      ) {
+  throw (
+    lastError ||
+    new Error(
+      "Unable to retrieve trail data."
+    )
+  );
 
-        throw new Error(
-          "Location not found. Try another city or place."
-        );
-
-      }
+}
 
 
-      return {
+/* =========================
+   ACTIVITY ROUTE FILTER
+========================= */
 
-        latitude:
-          Number(
-            data[0].lat
-          ),
+function getRoutePattern(
+  activity
+) {
 
-        longitude:
-          Number(
-            data[0].lon
-          ),
+  if (
+    activity === "Cycling"
+  ) {
 
-        displayName:
-          data[0].display_name
+    return "bicycle|mtb";
 
-      };
+  }
+
+
+  if (
+    activity === "Running"
+  ) {
+
+    return "running|hiking|foot|walking";
+
+  }
+
+
+  return "hiking|foot|walking";
+
+}
+
+
+/* =========================
+   HIGHWAY FILTER
+========================= */
+
+function getHighwayPattern(
+  activity
+) {
+
+  if (
+    activity === "Cycling"
+  ) {
+
+    return "cycleway|path|track|bridleway";
+
+  }
+
+
+  return "path|footway|track|bridleway";
+
+}
+
+
+/* =========================
+   GET REAL OSM TRAILS
+========================= */
+
+async function getRealTrails(
+  latitude,
+  longitude,
+  activity
+) {
+
+  const radius =
+    12000;
+
+
+  const routePattern =
+    getRoutePattern(
+      activity
+    );
+
+
+  const highwayPattern =
+    getHighwayPattern(
+      activity
+    );
+
+
+  /*
+     First request:
+     Get named route relations
+     and every way belonging to them.
+  */
+
+  const relationQuery = `
+
+    [out:json][timeout:45];
+
+    relation
+      (around:${radius},${latitude},${longitude})
+      ["type"="route"]
+      ["route"~"^(${routePattern})$"]
+      ["name"]
+      ->.routes;
+
+    (
+      .routes;
+
+      way(r.routes);
+
+    );
+
+    out geom;
+
+  `;
+
+
+  const relationData =
+    await queryOverpass(
+      relationQuery
+    );
+
+
+  const elements =
+    relationData.elements ||
+    [];
+
+
+  const relationMap =
+    new Map();
+
+  const wayMap =
+    new Map();
+
+
+  for (
+    const item
+    of elements
+  ) {
+
+    if (
+      item.type ===
+      "relation"
+    ) {
+
+      relationMap.set(
+        String(item.id),
+        item
+      );
 
     }
 
 
-    /* =========================
-       GET REAL OSM TRAILS
-    ========================= */
-
-    async function getRealTrails(
-      latitude,
-      longitude,
-      activity
+    else if (
+      item.type ===
+      "way"
     ) {
 
-      const radius =
-        12000;
+      wayMap.set(
+        String(item.id),
+        item
+      );
+
+    }
+
+  }
 
 
-      let activityFilter =
-        "";
+  const trails = [];
+
+  const relationNames =
+    new Set();
+
+
+  /* =========================
+     BUILD COMPLETE RELATIONS
+  ========================= */
+
+  for (
+    const relation
+    of relationMap.values()
+  ) {
+
+    if (
+      !relation.members ||
+      relation.members.length === 0
+    ) {
+
+      continue;
+
+    }
+
+
+    const usedWayIds =
+      new Set();
+
+
+    const wayGeometries = [];
+
+
+    for (
+      const member
+      of relation.members
+    ) {
+
+      /*
+         Only use actual way members.
+
+         Exclude alternative and excursion
+         routes so the main route is preferred.
+      */
+
+      if (
+        member.type !==
+        "way"
+      ) {
+
+        continue;
+
+      }
 
 
       if (
-        activity === "Cycling"
+        member.role ===
+        "alternative" ||
+        member.role ===
+        "excursion"
       ) {
 
-        activityFilter =
-          `
-          ["highway"~"cycleway|path|track|bridleway"]
-          `;
-
-      }
-
-      else if (
-        activity === "Running"
-      ) {
-
-        activityFilter =
-          `
-          ["highway"~"path|footway|track|bridleway"]
-          `;
-
-      }
-
-      else {
-
-        activityFilter =
-          `
-          ["highway"~"path|footway|track|bridleway"]
-          `;
+        continue;
 
       }
 
 
-      const query = `
-
-        [out:json][timeout:25];
-
-        (
-          way
-            (around:${radius},${latitude},${longitude})
-            ${activityFilter}
-            ["name"];
-
-          relation
-            (around:${radius},${latitude},${longitude})
-            ["route"="hiking"]
-            ["name"];
-
-        );
-
-        out geom;
-
-      `;
-
-
-      const response =
-        await fetch(
-          "https://overpass-api.de/api/interpreter",
-          {
-            method:
-              "POST",
-
-            body:
-              query
-          }
+      const wayId =
+        String(
+          member.ref
         );
 
 
       if (
-        !response.ok
+        usedWayIds.has(
+          wayId
+        )
       ) {
 
-        throw new Error(
-          "Trail data request failed."
-        );
+        continue;
 
       }
 
 
-      const data =
-        await response.json();
+      const way =
+        wayMap.get(
+          wayId
+        );
 
 
       if (
-        !data.elements ||
-        data.elements.length === 0
+        !way ||
+        !way.geometry ||
+        way.geometry.length < 2
       ) {
 
-        return [];
+        continue;
 
       }
 
 
-      const trails = [];
+      usedWayIds.add(
+        wayId
+      );
 
 
-      for (
-        const item
-        of data.elements
+      let geometry =
+        way.geometry.map(
+          point => ({
+            lat:
+              Number(point.lat),
+
+            lon:
+              Number(point.lon)
+          })
+        );
+
+
+      /*
+         OSM backward members should
+         be reversed before stitching.
+      */
+
+      if (
+        member.role ===
+        "backward"
       ) {
 
-        const geometry =
-          item.geometry ||
-          [];
+        geometry =
+          geometry
+            .slice()
+            .reverse();
+
+      }
 
 
-        if (
-          geometry.length < 2
-        ) {
+      wayGeometries.push(
+        geometry
+      );
 
-          continue;
-
-        }
+    }
 
 
-        const distance =
-          calculateTrailLength(
-            geometry
-          );
+    if (
+      wayGeometries.length === 0
+    ) {
+
+      continue;
+
+    }
 
 
-        if (
-          distance < 0.15
-        ) {
-
-          continue;
-
-        }
+    const segments =
+      mergeWayGeometries(
+        wayGeometries
+      );
 
 
-        const name =
-          item.tags &&
-          item.tags.name
-            ? item.tags.name
-            : "Unnamed Trail";
+    if (
+      segments.length === 0
+    ) {
+
+      continue;
+
+    }
 
 
-        const difficulty =
-          estimateDifficulty(
-            distance
-          );
+    const distance =
+      calculateSegmentsLength(
+        segments
+      );
 
 
-        const elevation =
-          item.tags &&
-          item.tags.ele
-            ? item.tags.ele
-            : null;
+    /*
+       Do not treat tiny route fragments
+       as full trails.
+    */
+
+    if (
+      distance < 0.5
+    ) {
+
+      continue;
+
+    }
 
 
-        trails.push({
+    const name =
+      relation.tags &&
+      relation.tags.name
+        ? relation.tags.name
+        : "Unnamed Trail";
+
+
+    const normalizedName =
+      name
+        .trim()
+        .toLowerCase();
+
+
+    relationNames.add(
+      normalizedName
+    );
+
+
+    const difficulty =
+      estimateDifficulty(
+        distance
+      );
+
+
+    const elevation =
+      relation.tags &&
+      relation.tags.ele
+        ? relation.tags.ele
+        : null;
+
+
+    trails.push({
+
+      id:
+        `relation-${relation.id}`,
+
+      name,
+
+      distance:
+        Number(
+          distance.toFixed(1)
+        ),
+
+      difficulty,
+
+      elevation,
+
+      segments,
+
+      geometry:
+        segments[0],
+
+      isRelation:
+        true,
+
+      source:
+        "OpenStreetMap"
+
+    });
+
+  }
+
+
+  /* =========================
+     FALLBACK NAMED WAYS
+  ========================= */
+
+  const wayQuery = `
+
+    [out:json][timeout:45];
+
+    way
+      (around:${radius},${latitude},${longitude})
+      ["highway"~"^(${highwayPattern})$"]
+      ["name"];
+
+    out geom;
+
+  `;
+
+
+  const wayData =
+    await queryOverpass(
+      wayQuery
+    );
+
+
+  const fallbackMap =
+    new Map();
+
+
+  for (
+    const way
+    of (
+      wayData.elements ||
+      []
+    )
+  ) {
+
+    if (
+      !way.geometry ||
+      way.geometry.length < 2
+    ) {
+
+      continue;
+
+    }
+
+
+    const geometry =
+      way.geometry.map(
+        point => ({
+          lat:
+            Number(point.lat),
+
+          lon:
+            Number(point.lon)
+        })
+      );
+
+
+    const distance =
+      calculateTrailLength(
+        geometry
+      );
+
+
+    /*
+       A 0.2 mile way is usually
+       just a mapped fragment.
+
+       Keep legitimate short named trails,
+       but reject tiny fragments.
+    */
+
+    if (
+      distance < 0.6
+    ) {
+
+      continue;
+
+    }
+
+
+    const name =
+      way.tags &&
+      way.tags.name
+        ? way.tags.name
+        : "Unnamed Trail";
+
+
+    const normalizedName =
+      name
+        .trim()
+        .toLowerCase();
+
+
+    /*
+       If a complete relation already exists
+       for this trail name, do not add the
+       individual way again.
+    */
+
+    if (
+      relationNames.has(
+        normalizedName
+      )
+    ) {
+
+      continue;
+
+    }
+
+
+    const existing =
+      fallbackMap.get(
+        normalizedName
+      );
+
+
+    if (
+      !existing ||
+      distance >
+        existing.distance
+    ) {
+
+      fallbackMap.set(
+        normalizedName,
+        {
 
           id:
-            item.id,
+            `way-${way.id}`,
 
           name,
 
@@ -2024,1316 +2639,1280 @@
               distance.toFixed(1)
             ),
 
-          difficulty,
+          difficulty:
+            estimateDifficulty(
+              distance
+            ),
 
-          elevation,
+          elevation:
+            way.tags &&
+            way.tags.ele
+              ? way.tags.ele
+              : null,
 
           geometry,
+
+          segments:
+            [geometry],
+
+          isRelation:
+            false,
 
           source:
             "OpenStreetMap"
 
-        });
+        }
+      );
+
+    }
+
+  }
+
+
+  trails.push(
+    ...fallbackMap.values()
+  );
+
+
+  /* =========================
+     REMOVE DUPLICATES
+  ========================= */
+
+  const finalMap =
+    new Map();
+
+
+  for (
+    const trail
+    of trails
+  ) {
+
+    const key =
+      trail.name
+        .trim()
+        .toLowerCase();
+
+
+    const existing =
+      finalMap.get(
+        key
+      );
+
+
+    if (
+      !existing ||
+      trail.distance >
+        existing.distance
+    ) {
+
+      finalMap.set(
+        key,
+        trail
+      );
+
+    }
+
+  }
+
+
+  return Array.from(
+    finalMap.values()
+  );
+
+}
+
+
+/* =========================
+   FALLBACK TRAILS
+========================= */
+
+function getFallbackTrails(
+  latitude,
+  longitude
+) {
+
+  return [
+
+    {
+
+      id:
+        "fallback-1",
+
+      name:
+        "Local Trail",
+
+      distance:
+        2.5,
+
+      difficulty:
+        "Easy",
+
+      elevation:
+        null,
+
+      geometry: [
+
+        {
+          lat:
+            latitude,
+
+          lon:
+            longitude
+        },
+
+        {
+          lat:
+            latitude + 0.006,
+
+          lon:
+            longitude + 0.006
+        },
+
+        {
+          lat:
+            latitude + 0.010,
+
+          lon:
+            longitude - 0.002
+        }
+
+      ],
+
+      segments: [],
+
+      isRelation:
+        false,
+
+      source:
+        "Fallback"
+
+    }
+
+  ];
+
+}
+
+
+/* =========================
+   WEATHER
+========================= */
+
+async function getWeather(
+  latitude,
+  longitude
+) {
+
+  const url =
+    "https://api.open-meteo.com/v1/forecast" +
+    "?latitude=" +
+    latitude +
+    "&longitude=" +
+    longitude +
+    "&current=temperature_2m,weather_code,wind_speed_10m" +
+    "&temperature_unit=fahrenheit" +
+    "&wind_speed_unit=mph";
+
+
+  const response =
+    await fetch(
+      url
+    );
+
+
+  if (
+    !response.ok
+  ) {
+
+    throw new Error(
+      "Weather request failed."
+    );
+
+  }
+
+
+  const data =
+    await response.json();
+
+
+  const current =
+    data.current;
+
+
+  return {
+
+    temperature:
+      current.temperature_2m,
+
+    windSpeed:
+      current.wind_speed_10m,
+
+    description:
+      getWeatherDescription(
+        current.weather_code
+      )
+
+  };
+
+}
+
+
+/* =========================
+   WEATHER DESCRIPTION
+========================= */
+
+function getWeatherDescription(
+  code
+) {
+
+  if (
+    code === 0
+  ) {
+
+    return "Clear sky";
+
+  }
+
+
+  if (
+    code === 1 ||
+    code === 2 ||
+    code === 3
+  ) {
+
+    return "Partly cloudy";
+
+  }
+
+
+  if (
+    code === 45 ||
+    code === 48
+  ) {
+
+    return "Fog";
+
+  }
+
+
+  if (
+    code >= 51 &&
+    code <= 67
+  ) {
+
+    return "Rain";
+
+  }
+
+
+  if (
+    code >= 71 &&
+    code <= 77
+  ) {
+
+    return "Snow";
+
+  }
+
+
+  if (
+    code >= 80 &&
+    code <= 82
+  ) {
+
+    return "Rain showers";
+
+  }
+
+
+  if (
+    code >= 95
+  ) {
+
+    return "Thunderstorm";
+
+  }
+
+
+  return "Current conditions";
+
+}
+
+
+/* =========================
+   DRAW TRAIL
+========================= */
+
+function drawTrail(
+  trail
+) {
+
+  if (
+    !map ||
+    !trail
+  ) {
+
+    return;
+
+  }
+
+
+  if (
+    currentTrailLayer
+  ) {
+
+    map.removeLayer(
+      currentTrailLayer
+    );
+
+    currentTrailLayer =
+      null;
+
+  }
+
+
+  const featureGroup =
+    L.featureGroup();
+
+
+  let segments = [];
+
+
+  if (
+    trail.segments &&
+    trail.segments.length > 0
+  ) {
+
+    segments =
+      trail.segments;
+
+  }
+
+  else if (
+    trail.geometry &&
+    trail.geometry.length >= 2
+  ) {
+
+    segments =
+      [
+        trail.geometry
+      ];
+
+  }
+
+
+  for (
+    const segment
+    of segments
+  ) {
+
+    if (
+      !segment ||
+      segment.length < 2
+    ) {
+
+      continue;
+
+    }
+
+
+    const coordinates =
+      segment.map(
+        point => [
+          point.lat,
+          point.lon
+        ]
+      );
+
+
+    L.polyline(
+      coordinates,
+      {
+        weight:
+          5,
+
+        opacity:
+          0.85
+      }
+    ).addTo(
+      featureGroup
+    );
+
+  }
+
+
+  if (
+    featureGroup.getLayers()
+      .length === 0
+  ) {
+
+    return;
+
+  }
+
+
+  featureGroup.addTo(
+    map
+  );
+
+
+  currentTrailLayer =
+    featureGroup;
+
+
+  const bounds =
+    featureGroup.getBounds();
+
+
+  if (
+    bounds.isValid()
+  ) {
+
+    map.fitBounds(
+      bounds,
+      {
+        padding:
+          [30, 30]
+      }
+    );
+
+  }
+
+}
+
+
+/* =========================
+   WEATHER DISPLAY
+========================= */
+
+function getWeatherDisplay(
+  weather
+) {
+
+  return (
+    `${weather.temperature.toFixed(0)}°F · ` +
+    `${weather.description} · ` +
+    `Wind ${weather.windSpeed.toFixed(0)} mph`
+  );
+
+}
+
+
+/* =========================
+   WHY THIS TRAIL
+========================= */
+
+function generateWhyList(
+  trail,
+  experience,
+  distancePreference
+) {
+
+  whyList.innerHTML =
+    "";
+
+
+  const difficultyMatches =
+    (
+      experience === "Beginner" &&
+      trail.difficulty === "Easy"
+    ) ||
+    (
+      experience === "Intermediate" &&
+      trail.difficulty === "Moderate"
+    ) ||
+    (
+      experience === "Advanced" &&
+      trail.difficulty === "Hard"
+    );
+
+
+  const difficultyLi =
+    document.createElement(
+      "li"
+    );
+
+
+  if (
+    difficultyMatches
+  ) {
+
+    difficultyLi.textContent =
+      `The difficulty matches your ${experience.toLowerCase()} experience level.`;
+
+  }
+
+  else {
+
+    difficultyLi.textContent =
+      `The ${trail.difficulty.toLowerCase()} difficulty provides a different challenge from your selected experience level.`;
+
+  }
+
+
+  whyList.appendChild(
+    difficultyLi
+  );
+
+
+  const distance =
+    Number(
+      trail.distance || 0
+    );
+
+
+  let distanceMatches =
+    false;
+
+
+  if (
+    distancePreference ===
+    "Short (under 5 miles)"
+  ) {
+
+    distanceMatches =
+      distance < 5;
+
+  }
+
+  else if (
+    distancePreference ===
+    "Medium (5-10 miles)"
+  ) {
+
+    distanceMatches =
+      distance >= 5 &&
+      distance <= 10;
+
+  }
+
+  else if (
+    distancePreference ===
+    "Long (10+ miles)"
+  ) {
+
+    distanceMatches =
+      distance >= 10;
+
+  }
+
+
+  const distanceLi =
+    document.createElement(
+      "li"
+    );
+
+
+  distanceLi.textContent =
+    distanceMatches
+      ? "The distance fits your selected range."
+      : "The distance is outside your preferred range.";
+
+
+  whyList.appendChild(
+    distanceLi
+  );
+
+
+  const sourceLi =
+    document.createElement(
+      "li"
+    );
+
+
+  if (
+    trail.isRelation
+  ) {
+
+    sourceLi.textContent =
+      "This route is assembled from an OpenStreetMap route relation and its mapped trail segments.";
+
+  }
+
+  else {
+
+    sourceLi.textContent =
+      "This trail is based on a named OpenStreetMap trail segment.";
+
+  }
+
+
+  whyList.appendChild(
+    sourceLi
+  );
+
+}
+
+
+/* =========================
+   RENDER OTHER TRAILS
+========================= */
+
+function renderOtherTrails(
+  trails
+) {
+
+  trailList.innerHTML =
+    "";
+
+
+  trails
+    .slice(0, 5)
+    .forEach(
+      trail => {
+
+        const option =
+          document.createElement(
+            "div"
+          );
+
+
+        option.className =
+          "trail-option";
+
+
+        const left =
+          document.createElement(
+            "div"
+          );
+
+
+        const name =
+          document.createElement(
+            "div"
+          );
+
+
+        name.className =
+          "trail-option-name";
+
+
+        name.textContent =
+          trail.name;
+
+
+        const meta =
+          document.createElement(
+            "div"
+          );
+
+
+        meta.className =
+          "trail-option-meta";
+
+
+        meta.textContent =
+          `${trail.distance.toFixed(1)} mi · ${trail.difficulty}`;
+
+
+        left.appendChild(
+          name
+        );
+
+
+        left.appendChild(
+          meta
+        );
+
+
+        const score =
+          document.createElement(
+            "div"
+          );
+
+
+        score.className =
+          "trail-option-score";
+
+
+        score.textContent =
+          `${trail.matchScore}% Match`;
+
+
+        option.appendChild(
+          left
+        );
+
+
+        option.appendChild(
+          score
+        );
+
+
+        option.addEventListener(
+          "click",
+          () => {
+
+            selectTrail(
+              trail
+            );
+
+          }
+        );
+
+
+        trailList.appendChild(
+          option
+        );
+
+      }
+    );
+
+}
+
+
+/* =========================
+   SELECT TRAIL
+========================= */
+
+async function selectTrail(
+  trail
+) {
+
+  selectedTrail =
+    trail;
+
+
+  trailName.textContent =
+    trail.name;
+
+
+  trailDistance.textContent =
+    `${trail.distance.toFixed(1)} mi`;
+
+
+  trailDifficulty.textContent =
+    trail.difficulty;
+
+
+  trailElevation.textContent =
+    trail.elevation
+      ? `${trail.elevation} m`
+      : "Not available";
+
+
+  trailLocation.textContent =
+    "Near your search";
+
+
+  matchScore.textContent =
+    `${trail.matchScore}% Match`;
+
+
+  drawTrail(
+    trail
+  );
+
+
+  generateWhyList(
+    trail,
+    experienceInput.value,
+    distanceInput.value
+  );
+
+
+  try {
+
+    showStatus(
+      "Generating personalized recommendation..."
+    );
+
+
+    const response =
+      await fetch(
+        "https://trail-mind-three.vercel.app/api/recommend",
+        {
+
+          method:
+            "POST",
+
+          headers: {
+
+            "Content-Type":
+              "application/json"
+
+          },
+
+          body:
+            JSON.stringify({
+
+              trail: {
+
+                name:
+                  trail.name,
+
+                distance:
+                  trail.distance,
+
+                difficulty:
+                  trail.difficulty,
+
+                source:
+                  trail.source,
+
+                isRelation:
+                  trail.isRelation
+
+              },
+
+              experience:
+                experienceInput.value,
+
+              distancePreference:
+                distanceInput.value,
+
+              weather:
+                currentWeatherText
+
+            })
+
+        }
+      );
+
+
+    if (
+      !response.ok
+    ) {
+
+      throw new Error(
+        "Recommendation service failed."
+      );
+
+    }
+
+
+    const data =
+      await response.json();
+
+
+    recommendation.textContent =
+      data.recommendation;
+
+
+    /*
+       IMPORTANT:
+       Do NOT replace the frontend
+       match score with the API score.
+    */
+
+    matchScore.textContent =
+      `${trail.matchScore}% Match`;
+
+
+    hideStatus();
+
+  }
+
+  catch (
+    error
+  ) {
+
+    hideStatus();
+
+
+    recommendation.textContent =
+      "This trail matches your selected preferences based on difficulty, distance, and available trail data.";
+
+  }
+
+}
+
+
+/* =========================
+   MAIN FORM
+========================= */
+
+form.addEventListener(
+  "submit",
+  async event => {
+
+    event.preventDefault();
+
+
+    hideError();
+
+    hideStatus();
+
+
+    results.style.display =
+      "none";
+
+
+    findButton.disabled =
+      true;
+
+
+    try {
+
+      const location =
+        locationInput.value.trim();
+
+
+      const activity =
+        activityInput.value;
+
+
+      const experience =
+        experienceInput.value;
+
+
+      const distancePreference =
+        distanceInput.value;
+
+
+      if (
+        !location
+      ) {
+
+        throw new Error(
+          "Please enter a location."
+        );
 
       }
 
 
       /* =========================
-         DEDUPLICATE BY NAME
+         LOCATION
       ========================= */
 
-      const trailMap =
-        new Map();
-
-
-      for (
-        const trail
-        of trails
-      ) {
-
-        const normalizedName =
-          trail.name
-            .trim()
-            .toLowerCase();
-
-
-        const existing =
-          trailMap.get(
-            normalizedName
-          );
-
-
-        if (
-          !existing ||
-          trail.distance >
-            existing.distance
-        ) {
-
-          trailMap.set(
-            normalizedName,
-            trail
-          );
-
-        }
-
-      }
-
-
-      return Array.from(
-        trailMap.values()
-      );
-
-    }
-
-
-    /* =========================
-       FALLBACK TRAILS
-    ========================= */
-
-    function getFallbackTrails(
-      latitude,
-      longitude
-    ) {
-
-      return [
-
-        {
-
-          id:
-            "fallback-1",
-
-          name:
-            "Local Trail",
-
-          distance:
-            2.5,
-
-          difficulty:
-            "Easy",
-
-          elevation:
-            null,
-
-          geometry: [
-
-            {
-              lat:
-                latitude,
-
-              lon:
-                longitude
-            },
-
-            {
-              lat:
-                latitude + 0.006,
-
-              lon:
-                longitude + 0.006
-            },
-
-            {
-              lat:
-                latitude + 0.010,
-
-              lon:
-                longitude - 0.002
-            }
-
-          ],
-
-          source:
-            "OpenStreetMap"
-
-        },
-
-        {
-
-          id:
-            "fallback-2",
-
-          name:
-            "Scenic Trail",
-
-          distance:
-            4.2,
-
-          difficulty:
-            "Moderate",
-
-          elevation:
-            null,
-
-          geometry: [
-
-            {
-              lat:
-                latitude,
-
-              lon:
-                longitude
-            },
-
-            {
-              lat:
-                latitude - 0.006,
-
-              lon:
-                longitude + 0.005
-            },
-
-            {
-              lat:
-                latitude - 0.010,
-
-              lon:
-                longitude - 0.003
-            }
-
-          ],
-
-          source:
-            "OpenStreetMap"
-
-        },
-
-        {
-
-          id:
-            "fallback-3",
-
-          name:
-            "Adventure Trail",
-
-          distance:
-            7.5,
-
-          difficulty:
-            "Hard",
-
-          elevation:
-            null,
-
-          geometry: [
-
-            {
-              lat:
-                latitude,
-
-              lon:
-                longitude
-            },
-
-            {
-              lat:
-                latitude + 0.009,
-
-              lon:
-                longitude - 0.006
-            },
-
-            {
-              lat:
-                latitude + 0.015,
-
-              lon:
-                longitude + 0.003
-            }
-
-          ],
-
-          source:
-            "OpenStreetMap"
-
-        }
-
-      ];
-
-    }
-
-
-    /* =========================
-       GET WEATHER
-    ========================= */
-
-    async function getWeather(
-      latitude,
-      longitude
-    ) {
-
-      const url =
-        "https://api.open-meteo.com/v1/forecast" +
-        "?latitude=" +
-        latitude +
-        "&longitude=" +
-        longitude +
-        "&current=temperature_2m,weather_code,wind_speed_10m" +
-        "&temperature_unit=fahrenheit" +
-        "&wind_speed_unit=mph";
-
-
-      const response =
-        await fetch(
-          url
-        );
-
-
-      if (
-        !response.ok
-      ) {
-
-        throw new Error(
-          "Weather request failed."
-        );
-
-      }
-
-
-      const data =
-        await response.json();
-
-
-      const current =
-        data.current;
-
-
-      return {
-
-        temperature:
-          current.temperature_2m,
-
-        windSpeed:
-          current.wind_speed_10m,
-
-        description:
-          getWeatherDescription(
-            current.weather_code
-          )
-
-      };
-
-    }
-
-
-    /* =========================
-       WEATHER DESCRIPTION
-    ========================= */
-
-    function getWeatherDescription(
-      code
-    ) {
-
-      if (
-        code === 0
-      ) {
-
-        return "Clear sky";
-
-      }
-
-
-      if (
-        code === 1 ||
-        code === 2 ||
-        code === 3
-      ) {
-
-        return "Partly cloudy";
-
-      }
-
-
-      if (
-        code === 45 ||
-        code === 48
-      ) {
-
-        return "Fog";
-
-      }
-
-
-      if (
-        code >= 51 &&
-        code <= 67
-      ) {
-
-        return "Rain";
-
-      }
-
-
-      if (
-        code >= 71 &&
-        code <= 77
-      ) {
-
-        return "Snow";
-
-      }
-
-
-      if (
-        code >= 80 &&
-        code <= 82
-      ) {
-
-        return "Rain showers";
-
-      }
-
-
-      if (
-        code >= 95
-      ) {
-
-        return "Thunderstorm";
-
-      }
-
-
-      return "Current conditions";
-
-    }
-
-
-    /* =========================
-       DRAW TRAIL
-    ========================= */
-
-    function drawTrail(
-      trail
-    ) {
-
-      if (
-        !map
-      ) {
-
-        return;
-
-      }
-
-
-      if (
-        currentTrailLayer
-      ) {
-
-        map.removeLayer(
-          currentTrailLayer
-        );
-
-        currentTrailLayer =
-          null;
-
-      }
-
-
-      if (
-        !trail ||
-        !trail.geometry ||
-        trail.geometry.length < 2
-      ) {
-
-        return;
-
-      }
-
-
-      const coordinates =
-        trail.geometry.map(
-          point => [
-            point.lat,
-            point.lon
-          ]
-        );
-
-
-      currentTrailLayer =
-        L.polyline(
-          coordinates,
-          {
-            weight: 5
-          }
-        ).addTo(
-          map
-        );
-
-
-      map.fitBounds(
-        currentTrailLayer.getBounds(),
-        {
-          padding:
-            [30, 30]
-        }
-      );
-
-    }
-
-
-    /* =========================
-       GET WEATHER DISPLAY TEXT
-    ========================= */
-
-    function getWeatherDisplay(
-      weather
-    ) {
-
-      return (
-        `${weather.temperature.toFixed(0)}°F · ` +
-        `${weather.description} · ` +
-        `Wind ${weather.windSpeed.toFixed(0)} mph`
-      );
-
-    }
-
-
-    /* =========================
-       GENERATE WHY LIST
-    ========================= */
-
-    function generateWhyList(
-      trail,
-      experience,
-      distancePreference
-    ) {
-
-      whyList.innerHTML =
-        "";
-
-
-      const difficultyMatches =
-        (
-          experience === "Beginner" &&
-          trail.difficulty === "Easy"
-        ) ||
-        (
-          experience === "Intermediate" &&
-          trail.difficulty === "Moderate"
-        ) ||
-        (
-          experience === "Advanced" &&
-          trail.difficulty === "Hard"
-        );
-
-
-      if (
-        difficultyMatches
-      ) {
-
-        const li =
-          document.createElement(
-            "li"
-          );
-
-        li.textContent =
-          `The difficulty matches your ${experience.toLowerCase()} experience level.`;
-
-        whyList.appendChild(
-          li
-        );
-
-      }
-
-      else {
-
-        const li =
-          document.createElement(
-            "li"
-          );
-
-        li.textContent =
-          `The trail provides a ${trail.difficulty.toLowerCase()} option for your experience level.`;
-
-        whyList.appendChild(
-          li
-        );
-
-      }
-
-
-      const distance =
-        Number(
-          trail.distance
-        );
-
-
-      let distanceMatches =
-        false;
-
-
-      if (
-        distancePreference ===
-        "Short (under 5 miles)"
-      ) {
-
-        distanceMatches =
-          distance < 5;
-
-      }
-
-      else if (
-        distancePreference ===
-        "Medium (5-10 miles)"
-      ) {
-
-        distanceMatches =
-          distance >= 5 &&
-          distance <= 10;
-
-      }
-
-      else if (
-        distancePreference ===
-        "Long (10+ miles)"
-      ) {
-
-        distanceMatches =
-          distance >= 10;
-
-      }
-
-
-      const distanceLi =
-        document.createElement(
-          "li"
-        );
-
-
-      if (
-        distanceMatches
-      ) {
-
-        distanceLi.textContent =
-          "The distance matches your preference for this outing.";
-
-      }
-
-      else {
-
-        distanceLi.textContent =
-          "The distance is somewhat different from your preferred range.";
-
-      }
-
-
-      whyList.appendChild(
-        distanceLi
+      showStatus(
+        "Finding your location..."
       );
 
 
-      const sourceLi =
-        document.createElement(
-          "li"
+      const locationData =
+        await geocodeLocation(
+          location
         );
 
 
-      sourceLi.textContent =
-        "Trail information comes from real OpenStreetMap data.";
+      /* =========================
+         MAP
+      ========================= */
 
-      whyList.appendChild(
-        sourceLi
-      );
-
-    }
-
-
-    /* =========================
-       RENDER OTHER TRAILS
-    ========================= */
-
-    function renderOtherTrails(
-      trails
-    ) {
-
-      trailList.innerHTML =
-        "";
-
-
-      trails
-        .slice(0, 5)
-        .forEach(
-          trail => {
-
-            const option =
-              document.createElement(
-                "div"
-              );
-
-
-            option.className =
-              "trail-option";
-
-
-            const left =
-              document.createElement(
-                "div"
-              );
-
-
-            const name =
-              document.createElement(
-                "div"
-              );
-
-
-            name.className =
-              "trail-option-name";
-
-
-            name.textContent =
-              trail.name;
-
-
-            const meta =
-              document.createElement(
-                "div"
-              );
-
-
-            meta.className =
-              "trail-option-meta";
-
-
-            meta.textContent =
-              `${trail.distance.toFixed(1)} mi · ${trail.difficulty}`;
-
-
-            left.appendChild(
-              name
-            );
-
-            left.appendChild(
-              meta
-            );
-
-
-            const score =
-              document.createElement(
-                "div"
-              );
-
-
-            score.className =
-              "trail-option-score";
-
-
-            score.textContent =
-              `${trail.matchScore}% Match`;
-
-
-            option.appendChild(
-              left
-            );
-
-            option.appendChild(
-              score
-            );
-
-
-            option.addEventListener(
-              "click",
-              () => {
-
-                selectTrail(
-                  trail
-                );
-
-              }
-            );
-
-
-            trailList.appendChild(
-              option
-            );
-
-          }
-        );
-
-    }
-
-
-    /* =========================
-       SELECT TRAIL
-    ========================= */
-
-    async function selectTrail(
-      trail
-    ) {
-
-      selectedTrail =
-        trail;
-
-
-      trailName.textContent =
-        trail.name;
-
-
-      trailDistance.textContent =
-        `${trail.distance.toFixed(1)} mi`;
-
-
-      trailDifficulty.textContent =
-        trail.difficulty;
-
-
-      trailElevation.textContent =
-        trail.elevation
-          ? `${trail.elevation} m`
-          : "Not available";
-
-
-      trailLocation.textContent =
-        "Near your search";
-
-
-      matchScore.textContent =
-        `${trail.matchScore}% Match`;
-
-
-      drawTrail(
-        trail
+      initializeMap(
+        locationData.latitude,
+        locationData.longitude
       );
 
 
-      generateWhyList(
-        trail,
-        experienceInput.value,
-        distanceInput.value
+      /* =========================
+         TRAILS
+      ========================= */
+
+      showStatus(
+        "Finding real trails and route relations..."
       );
+
+
+      let trails = [];
 
 
       try {
 
-        showStatus(
-          "Generating trail recommendation..."
+        trails =
+          await getRealTrails(
+            locationData.latitude,
+            locationData.longitude,
+            activity
+          );
+
+      }
+
+      catch (
+        error
+      ) {
+
+        console.error(
+          error
         );
 
-
-        const recommendationResponse =
-          await fetch(
-            "https://trail-mind-three.vercel.app/api/recommend",
-            {
-
-              method:
-                "POST",
-
-              headers: {
-
-                "Content-Type":
-                  "application/json"
-
-              },
-
-              body:
-                JSON.stringify({
-
-                  trail: {
-
-                    name:
-                      trail.name,
-
-                    distance:
-                      Number(
-                        trail.distance
-                      ),
-
-                    difficulty:
-                      trail.difficulty,
-
-                    source:
-                      trail.source
-
-                  },
-
-                  experience:
-                    experienceInput.value,
-
-                  distancePreference:
-                    distanceInput.value,
-
-                  weather:
-                    currentWeatherText
-
-                })
-
-            }
-          );
-
-
-        if (
-          !recommendationResponse.ok
-        ) {
-
-          throw new Error(
-            "Recommendation service failed."
-          );
-
-        }
-
-
-        const recommendationData =
-          await recommendationResponse.json();
-
-
-        recommendation.textContent =
-          recommendationData.recommendation;
-
-
-        if (
-          recommendationData.matchScore
-        ) {
-
-          trail.matchScore =
-            recommendationData.matchScore;
-
-
-          matchScore.textContent =
-            `${trail.matchScore}% Match`;
-
-        }
-
-
-        hideStatus();
-
       }
 
-      catch (error) {
 
-        hideStatus();
+      if (
+        trails.length === 0
+      ) {
 
-        recommendation.textContent =
-          "This trail matches your selected preferences based on difficulty, distance, and current conditions.";
-
-      }
-
-    }
-
-
-    /* =========================
-       WEATHER STATE
-    ========================= */
-
-    let currentWeatherText =
-      "";
-
-
-    /* =========================
-       MAIN FORM
-    ========================= */
-
-    form.addEventListener(
-      "submit",
-      async event => {
-
-        event.preventDefault();
-
-
-        hideError();
-
-        hideStatus();
-
-
-        results.style.display =
-          "none";
-
-
-        findButton.disabled =
-          true;
-
-
-        try {
-
-          /* =========================
-             READ INPUT
-          ========================= */
-
-          const location =
-            locationInput.value.trim();
-
-
-          const activity =
-            activityInput.value;
-
-
-          const experience =
-            experienceInput.value;
-
-
-          const distancePreference =
-            distanceInput.value;
-
-
-          if (
-            !location
-          ) {
-
-            throw new Error(
-              "Please enter a location."
-            );
-
-          }
-
-
-          /* =========================
-             STEP 1
-          ========================= */
-
-          showStatus(
-            "Finding your location..."
-          );
-
-
-          const locationData =
-            await geocodeLocation(
-              location
-            );
-
-
-          /* =========================
-             STEP 2
-          ========================= */
-
-          showStatus(
-            "Finding nearby trails..."
-          );
-
-
-          initializeMap(
+        trails =
+          getFallbackTrails(
             locationData.latitude,
             locationData.longitude
           );
 
-
-          let trails = [];
-
-
-          try {
-
-            trails =
-              await getRealTrails(
-                locationData.latitude,
-                locationData.longitude,
-                activity
-              );
-
-          }
-
-          catch (
-            trailError
-          ) {
-
-            console.error(
-              trailError
-            );
-
-          }
+      }
 
 
-          /* =========================
-             FALLBACK
-          ========================= */
+      /* =========================
+         SCORE
+      ========================= */
+
+      trails =
+        trails.map(
+          trail => ({
+
+            ...trail,
+
+            matchScore:
+              calculateMatchScore(
+                trail,
+                experience,
+                distancePreference
+              )
+
+          })
+        );
+
+
+      /* =========================
+         SORT
+      ========================= */
+
+      trails.sort(
+        (
+          a,
+          b
+        ) => {
 
           if (
-            trails.length === 0
+            b.matchScore !==
+            a.matchScore
           ) {
 
-            trails =
-              getFallbackTrails(
-                locationData.latitude,
-                locationData.longitude
-              );
+            return (
+              b.matchScore -
+              a.matchScore
+            );
 
           }
 
 
-          /* =========================
-             CALCULATE MATCH SCORES
-          ========================= */
+          if (
+            b.isRelation !==
+            a.isRelation
+          ) {
 
-          trails =
-            trails.map(
-              trail => {
+            return b.isRelation
+              ? 1
+              : -1;
 
-                return {
-
-                  ...trail,
-
-                  matchScore:
-                    calculateMatchScore(
-                      trail,
-                      experience,
-                      distancePreference
-                    )
-
-                };
-
-              }
-            );
+          }
 
 
-          /* =========================
-             SORT TRAILS
-          ========================= */
-
-          trails.sort(
-            (
-              a,
-              b
-            ) => {
-
-              if (
-                b.matchScore !==
-                a.matchScore
-              ) {
-
-                return (
-                  b.matchScore -
-                  a.matchScore
-                );
-
-              }
-
-
-              return (
-                a.distance -
-                b.distance
-              );
-
-            }
+          return (
+            a.distance -
+            b.distance
           );
 
-
-          /* =========================
-             STORE TRAILS
-          ========================= */
-
-          currentTrails =
-            trails;
+        }
+      );
 
 
-          /* =========================
-             STEP 3
-          ========================= */
-
-          showStatus(
-            "Checking current weather..."
-          );
+      currentTrails =
+        trails;
 
 
-          const weather =
-            await getWeather(
-              locationData.latitude,
-              locationData.longitude
-            );
+      selectedTrail =
+        trails[0];
 
 
-          currentWeatherText =
-            `${weather.temperature.toFixed(0)}°F · ` +
-            `${weather.description} · ` +
-            `Wind ${weather.windSpeed.toFixed(0)} mph`;
+      /* =========================
+         WEATHER
+      ========================= */
+
+      showStatus(
+        "Checking current weather..."
+      );
 
 
-          /* =========================
-             WEATHER DISPLAY
-          ========================= */
-
-          weatherText.textContent =
-            currentWeatherText;
-
-
-          /* =========================
-             SELECT BEST TRAIL
-          ========================= */
-
-          selectedTrail =
-            trails[0];
+      const weather =
+        await getWeather(
+          locationData.latitude,
+          locationData.longitude
+        );
 
 
-          /* =========================
-             DISPLAY RESULTS
-          ========================= */
-
-          results.style.display =
-            "block";
+      currentWeatherText =
+        getWeatherDisplay(
+          weather
+        );
 
 
-          trailName.textContent =
-            selectedTrail.name;
+      weatherText.textContent =
+        currentWeatherText;
 
 
-          trailLocation.textContent =
-            "Near your search";
+      /* =========================
+         DISPLAY RESULT
+      ========================= */
+
+      results.style.display =
+        "block";
 
 
-          trailDistance.textContent =
-            `${selectedTrail.distance.toFixed(1)} mi`;
+      trailName.textContent =
+        selectedTrail.name;
 
 
-          trailDifficulty.textContent =
-            selectedTrail.difficulty;
+      trailLocation.textContent =
+        locationData.displayName;
 
 
-          trailElevation.textContent =
-            selectedTrail.elevation
-              ? `${selectedTrail.elevation} m`
-              : "Not available";
+      trailDistance.textContent =
+        `${selectedTrail.distance.toFixed(1)} mi`;
 
 
-          matchScore.textContent =
-            `${selectedTrail.matchScore}% Match`;
+      trailDifficulty.textContent =
+        selectedTrail.difficulty;
 
 
-          drawTrail(
-            selectedTrail
-          );
+      trailElevation.textContent =
+        selectedTrail.elevation
+          ? `${selectedTrail.elevation} m`
+          : "Not available";
 
 
-          generateWhyList(
-            selectedTrail,
-            experience,
-            distancePreference
-          );
+      matchScore.textContent =
+        `${selectedTrail.matchScore}% Match`;
 
 
-          /* =========================
-             OTHER TRAILS
-          ========================= */
-
-          renderOtherTrails(
-            trails.slice(1)
-          );
+      drawTrail(
+        selectedTrail
+      );
 
 
-          /* =========================
-             RECOMMENDATION
-          ========================= */
-
-          showStatus(
-            "Generating personalized recommendation..."
-          );
+      generateWhyList(
+        selectedTrail,
+        experience,
+        distancePreference
+      );
 
 
-          const recommendationResponse =
-            await fetch(
-              "https://trail-mind-three.vercel.app/api/recommend",
-              {
+      renderOtherTrails(
+        trails.slice(1)
+      );
 
-                method:
-                  "POST",
 
-                headers: {
+      /* =========================
+         RECOMMENDATION
+      ========================= */
 
-                  "Content-Type":
-                    "application/json"
+      showStatus(
+        "Generating personalized recommendation..."
+      );
+
+
+      const recommendationResponse =
+        await fetch(
+          "https://trail-mind-three.vercel.app/api/recommend",
+          {
+
+            method:
+              "POST",
+
+            headers: {
+
+              "Content-Type":
+                "application/json"
+
+            },
+
+            body:
+              JSON.stringify({
+
+                trail: {
+
+                  name:
+                    selectedTrail.name,
+
+                  distance:
+                    selectedTrail.distance,
+
+                  difficulty:
+                    selectedTrail.difficulty,
+
+                  source:
+                    selectedTrail.source,
+
+                  isRelation:
+                    selectedTrail.isRelation
 
                 },
 
-                body:
-                  JSON.stringify({
+                experience,
 
-                    trail: {
+                distancePreference,
 
-                      name:
-                        selectedTrail.name,
+                weather:
+                  currentWeatherText
 
-                      distance:
-                        Number(
-                          selectedTrail.distance
-                        ),
-
-                      difficulty:
-                        selectedTrail.difficulty,
-
-                      source:
-                        selectedTrail.source
-
-                    },
-
-                    experience,
-
-                    distancePreference,
-
-                    weather:
-                      currentWeatherText
-
-                  })
-
-              }
-            );
-
-
-          if (
-            !recommendationResponse.ok
-          ) {
-
-            throw new Error(
-              "Recommendation service failed."
-            );
+              })
 
           }
+        );
 
 
-          const recommendationData =
-            await recommendationResponse.json();
+      if (
+        !recommendationResponse.ok
+      ) {
 
-
-          /* =========================
-             DISPLAY RECOMMENDATION
-          ========================= */
-
-          recommendation.textContent =
-            recommendationData.recommendation;
-
-
-          if (
-            recommendationData.matchScore
-          ) {
-
-            selectedTrail.matchScore =
-              recommendationData.matchScore;
-
-
-            matchScore.textContent =
-              `${selectedTrail.matchScore}% Match`;
-
-          }
-
-
-          hideStatus();
-
-        }
-
-        catch (
-          error
-        ) {
-
-          console.error(
-            error
-          );
-
-
-          hideStatus();
-
-
-          showError(
-            error.message ||
-            "Something went wrong. Please try again."
-          );
-
-        }
-
-        finally {
-
-          findButton.disabled =
-            false;
-
-        }
+        throw new Error(
+          "Recommendation service failed."
+        );
 
       }
-    );
 
 
-  </script>
+      const recommendationData =
+        await recommendationResponse.json();
+
+
+      recommendation.textContent =
+        recommendationData.recommendation;
+
+
+      /*
+         Frontend is the single source
+         of truth for Match Score.
+      */
+
+      matchScore.textContent =
+        `${selectedTrail.matchScore}% Match`;
+
+
+      hideStatus();
+
+    }
+
+    catch (
+      error
+    ) {
+
+      console.error(
+        error
+      );
+
+
+      hideStatus();
+
+
+      showError(
+        error.message ||
+        "Something went wrong. Please try again."
+      );
+
+    }
+
+    finally {
+
+      findButton.disabled =
+        false;
+
+    }
+
+  }
+);
+
+</script>
 
 </body>
 
