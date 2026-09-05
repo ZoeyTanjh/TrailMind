@@ -692,15 +692,48 @@ async function getRealTrails(
   `;
 
 
-  const response =
+  /* =========================
+     SEND EXACT TRAIL DATA
+  ========================= */
+  
+  const recommendationResponse =
     await fetch(
-      "https://overpass-api.de/api/interpreter",
+      "https://trail-mind-three.vercel.app/api/recommend",
       {
         method: "POST",
-
-        body:
-          "data=" +
-          encodeURIComponent(query)
+  
+        headers: {
+          "Content-Type": "application/json"
+        },
+  
+        body: JSON.stringify({
+  
+          trail: {
+  
+            name: selectedTrail.name,
+  
+            distance:
+              Number(
+                selectedTrail.distance
+              ),
+  
+            difficulty:
+              selectedTrail.difficulty,
+  
+            source:
+              selectedTrail.source
+  
+          },
+  
+          experience,
+  
+          distancePreference,
+  
+          weather:
+            weatherDescription
+  
+        })
+  
       }
     );
 
