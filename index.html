@@ -1185,8 +1185,8 @@ async function findTrail() {
           .weather_code
       );
 
-    const weatherText =
-       `${temperature}°F, ${weatherInfo.text}, Wind ${wind} mph`;
+    const aiWeatherText =
+      `${temperature}°F, ${weatherInfo.text}, Wind ${wind} mph`;
 
 
     document.getElementById(
@@ -1212,7 +1212,7 @@ async function findTrail() {
           trail: trail,
           experience: experience,
           distancePreference: distancePreference,
-          weather: weatherText
+          weather: aiWeatherText
         })
       });
     
