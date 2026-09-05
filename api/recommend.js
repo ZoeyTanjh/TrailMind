@@ -1,8 +1,8 @@
-export default async function handler(req, res) {
+/* =========================
+   CORS
+========================= */
 
-  /* =========================
-               CORS
-   =========================*/
+export default async function handler(req, res) {
 
   res.setHeader(
     "Access-Control-Allow-Origin",
@@ -21,8 +21,8 @@ export default async function handler(req, res) {
 
 
   /* =========================
-     HANDLE CORS PREFLIGHT
-   =========================*/
+     CORS PREFLIGHT
+  ========================= */
 
   if (req.method === "OPTIONS") {
     return res.status(200).end();
@@ -30,8 +30,8 @@ export default async function handler(req, res) {
 
 
   /* =========================
-       ONLY ALLOW POST
-   =========================*/
+     ONLY ALLOW POST
+  ========================= */
 
   if (req.method !== "POST") {
     return res.status(405).json({
@@ -43,8 +43,8 @@ export default async function handler(req, res) {
   try {
 
     /* =========================
-     GET REQUEST DATA
-     =========================*/
+       GET REQUEST DATA
+    ========================= */
 
     const {
       trail,
@@ -55,110 +55,151 @@ export default async function handler(req, res) {
 
 
     /* =========================
-     BUILD AI PROMPT
-     =========================*/
+       EXPERIENCE ANALYSIS
+    ========================= */
 
-    const prompt = `
-You are an outdoor trip planning assistant.
+    let experienceText = "";
 
-Recommend the following trail based on the user's preferences and current conditions.
+    if (experience === "beginner") {
 
-User experience: ${experience}
+      experienceText =
+        "As a beginner, this trail offers a manageable option without being overly demanding.";
 
-Preferred distance: ${distancePreference}
+    } else if (experience === "intermediate") {
 
-Trail:
-Name: ${trail.name}
-Distance: ${trail.distance} miles
-Difficulty: ${trail.difficulty}
+      experienceText =
+        "For an intermediate hiker, this trail provides a good balance of challenge and accessibility.";
 
-Current weather:
-${weather}
+    } else if (experience === "advanced") {
 
-Give a concise recommendation in 2-3 sentences.
+      experienceText =
+        "For an experienced hiker, this trail provides a good outdoor challenge.";
 
-Mention:
-1. Why the trail matches the user's experience level.
-2. Whether the distance matches their preference.
-3. Whether the current weather is suitable.
+    } else {
 
-Be natural and helpful.
-`;
+      experienceText =
+        "This trail can be a practical option based on your selected experience level.";
 
-
-    /* =========================
-         CALL OPENAI API
-    =========================*/
-
-    const response = await fetch(
-      "https://api.openai.com/v1/responses",
-      {
-        method: "POST",
-
-        headers: {
-          "Content-Type": "application/json",
-
-          "Authorization":
-            `Bearer ${process.env.OPENAI_API_KEY}`
-        },
-
-        body: JSON.stringify({
-
-          model: "gpt-5.6-luna",
-
-          input: prompt,
-
-          max_output_tokens: 150
-
-        })
-      }
-    );
-
-
-    /* =========================
-         HANDLE OPENAI ERROR
-     =========================*/
-
-    if (!response.ok) {
-
-      const error =
-        await response.text();
-    
-      console.error(
-        "OpenAI API Error:",
-        error
-      );
-    
-      return res.status(response.status).json({
-        error: error
-      });
-    
     }
 
+
     /* =========================
-        GET OPENAI RESPONSE
-       =========================*/
+       DISTANCE ANALYSIS
+    ========================= */
 
-    const data =
-      await response.json();
+    let distanceText = "";
+
+    if (distancePreference === "short") {
+
+      if (trail.distance <= 5) {
+
+        distanceText =
+          "Its shorter distance also matches your preference for a quick outing.";
+
+      } else {
+
+        distanceText =
+          "The trail is somewhat longer than your preferred short distance.";
+
+      }
+
+    } else if (distancePreference === "medium") {
+
+      if (
+        trail.distance > 5 &&
+        trail.distance <= 10
+      ) {
+
+        distanceText =
+          "Its distance fits well with your preference for a medium-length hike.";
+
+      } else {
+
+        distanceText =
+          "Its distance is somewhat different from your preferred medium-length hike.";
+
+      }
+
+    } else if (distancePreference === "long") {
+
+      if (trail.distance > 10) {
+
+        distanceText =
+          "Its longer distance makes it a strong match for a longer outdoor adventure.";
+
+      } else {
+
+        distanceText =
+          "The trail is shorter than your preferred long-distance outing.";
+
+      }
+
+    } else {
+
+      distanceText =
+        "The trail distance provides a reasonable option for your preferences.";
+
+    }
 
 
-    /*=========================
-       RETURN AI RECOMMENDATION
-       =========================*/
+    /* =========================
+       WEATHER ANALYSIS
+    ========================= */
+
+    let weatherText =
+      "Current conditions appear reasonable for an outdoor activity.";
+
+    const lowerWeather =
+      String(weather).toLowerCase();
+
+
+    if (
+      lowerWeather.includes("rain") ||
+      lowerWeather.includes("storm") ||
+      lowerWeather.includes("snow")
+    ) {
+
+      weatherText =
+        "Current weather conditions may make the trail less suitable, so check conditions carefully before heading out.";
+
+    } else if (
+      lowerWeather.includes("wind")
+    ) {
+
+      weatherText =
+        "Wind conditions should be considered before starting the hike.";
+
+    }
+
+
+    /* =========================
+       FINAL RECOMMENDATION
+    ========================= */
+
+    const recommendation =
+      `${experienceText} ${distanceText} ${weatherText}`;
+
+
+    /* =========================
+       RETURN RESULT
+    ========================= */
 
     return res.status(200).json({
 
       recommendation:
-        data.output_text
+        recommendation
 
     });
 
 
   } catch (error) {
 
+    /* =========================
+       ERROR HANDLING
+    ========================= */
+
     console.error(
-      "Server Error:",
+      "Recommendation Error:",
       error
     );
 
@@ -166,7 +207,7 @@ Be natural and helpful.
     return res.status(500).json({
 
       error:
-        "Server error"
+        "Recommendation failed"
 
     });
 
