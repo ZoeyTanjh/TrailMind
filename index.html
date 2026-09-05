@@ -1152,44 +1152,55 @@ async function findTrail() {
     /* =========================
        AI RECOMMENDATION
     ========================= */
-
-    let recommendation =
-      `Based on your ${experience.toLowerCase()} experience level, ` +
-      `${activity.toLowerCase()} preference, and desired ` +
-      `${distancePreference.toLowerCase()}, ` +
-      `${trail.name} is a strong match. `;
-
-
-    if (
-      trail.difficulty === "Easy"
-    ) {
-
-      recommendation +=
-        "The easier terrain makes it a good option for a comfortable outdoor adventure.";
-
+    
+    try {
+    
+      const aiResponse = await fetch("/api/recommend", {
+        method: "POST",
+    
+        headers: {
+          "Content-Type": "application/json"
+        },
+    
+        body: JSON.stringify({
+          trail: trail,
+          experience: experience,
+          distancePreference: distancePreference,
+          weather: weatherText
+        })
+      });
+    
+      const aiData = await aiResponse.json();
+    
+      if (aiResponse.ok) {
+    
+        document.getElementById(
+          "aiRecommendation"
+        ).textContent =
+          aiData.recommendation;
+    
+      } else {
+    
+        document.getElementById(
+          "aiRecommendation"
+        ).textContent =
+          "AI recommendation is temporarily unavailable.";
+    
+      }
+    
+    } catch (error) {
+    
+      console.error(
+        "AI recommendation error:",
+        error
+      );
+    
+      document.getElementById(
+        "aiRecommendation"
+      ).textContent =
+        "AI recommendation is temporarily unavailable.";
+    
     }
-
-    else if (
-      trail.difficulty === "Moderate"
-    ) {
-
-      recommendation +=
-        "The moderate terrain provides a good balance of challenge and accessibility.";
-
-    }
-
-    else {
-
-      recommendation +=
-        "The challenging terrain makes it better suited for experienced outdoor enthusiasts.";
-
-    }
-
-
-    document.getElementById(
-      "aiRecommendation"
-    ).textContent =
-      recommendation;
 
 
     /* =========================
@@ -1227,6 +1238,9 @@ async function findTrail() {
         weatherData.current
           .weather_code
       );
+
+    const weatherText =
+       `${temperature}°F, ${weatherInfo.text}, Wind ${wind} mph`;
 
 
     document.getElementById(
